@@ -1,0 +1,152 @@
+---
+title: "roi_analyses"
+author: "baf44"
+date: "3/15/2023"
+output: html_document
+---
+
+#### setup
+
+```{r load functions and data, include=FALSE}
+library(feisr)
+library(lme4)
+library(lmerTest)
+library(stringr)
+library(dplyr)
+
+# set project directory
+source("code/setup_data.R")
+
+# import betas extract from ROIs
+HighvLow_betas <- read.delim("~/Library/CloudStorage/OneDrive-ThePennsylvaniaStateUniversity/a-bari/00_PennState/Projects/FoodBrainStudy_fMRI-intake/data/raw/all_betas-High-Low_allPS.txt")
+
+LargevSmall_betas <- read.delim("~/Library/CloudStorage/OneDrive-ThePennsylvaniaStateUniversity/a-bari/00_PennState/Projects/FoodBrainStudy_fMRI-intake/data/raw/all_betas-Large-Small_allED.txt")
+
+```
+
+```{r clean beta dataframes, include=FALSE}
+
+# remove rows without data
+HighvLow_betas_clean<-HighvLow_betas[!(HighvLow_betas$File=="File"),]
+LargevSmall_betas_clean<-HighvLow_betas[!(LargevSmall_betas$File=="File"),]
+
+# make subject column that extracts sub-XXX
+HighvLow_betas_clean$sub <- sapply(str_split(HighvLow_betas_clean$File, "/"), `[`, 12)
+LargevSmall_betas_clean$sub <- sapply(str_split(LargevSmall_betas_clean$File, "/"), `[`, 12)
+
+# extract ID from sub-XXX
+HighvLow_betas_clean$sub <- as.numeric(sub("sub-", "", HighvLow_betas_clean$sub))
+LargevSmall_betas_clean$sub <- as.numeric(sub("sub-", "", LargevSmall_betas_clean$sub))
+
+# remove columns
+HighvLow_betas_clean = subset(HighvLow_betas_clean, select = -c(File, Sub.brick))
+LargevSmall_betas_clean = subset(LargevSmall_betas_clean, select = -c(File, Sub.brick))
+```
+
+```{r concat intake and brain data, include=FALSE}
+
+# left join -- only retain subjects who have brain data
+intake_long_HighvLow <- left_join(HighvLow_betas_clean, intake_long, by="sub")
+intake_long_LargevSmall <- left_join(LargevSmall_betas_clean, intake_long, by="sub")
+
+# convert roi columns to numeric
+cols.num <- c("Mean_1","Mean_2", "Mean_4", "Mean_8", "Mean_16", "Mean_32", "Mean_64", "Mean_128", "Mean_256", "Mean_512", "Mean_1024")
+intake_long_HighvLow[cols.num] <- sapply(intake_long_HighvLow[cols.num],as.numeric)
+intake_long_LargevSmall[cols.num] <- sapply(intake_long_LargevSmall[cols.num],as.numeric)
+
+```
+
+#### roi locations
+1 - L Cerebellum (English et al. Pediatr Obes. 2019)
+2 - R Cerebellum (English et al. Pediatr Obes. 2019)
+4 - L middle insula (Van Meer et al. 2015 NeuroImage)
+8	-	R middle insula (Van Meer et al. 2015 NeuroImage)
+16 - Left lateral orbitofrontal cortex/ IFG (Van Meer et al. 2015 NeuroImage)
+32 - Left caudate / dorsal striatum (Van Meer et al. 2015 NeuroImage)
+64 - Left dorsolateral prefrontal cortex (Meng et al. 2020, ORCP)
+128	- R Ventral striatum (kind of, need to confirm ROI is acceptable; van der Laan et al. 2011 Neuroimage)
+256	- R vmpfc/Medial OFC (Hare et al. Science 2009)
+512	- L anterior insula (Tang et al. Physiology & Behavior 2012)
+1024 - R middle insula (Tang et al. Physiology & Behavior 2012)
+
+#### analyses
+
+```{r mixed models - PS response vs PSE, include=FALSE}
+
+#### Intake model ####
+## mixed effects models with and without quadratic term (no brain data)
+mod <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop + (1 | sub), data = intake_long)
+mod_quad <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop + I(ps_prop*ps_prop) + (1 | sub), data = intake_long)
+anova(mod, mod_quad) # test whether adding quadratic improves model fit -- it does, so include quadratic term in ROI analyses 
+
+#### ROI analyses ####
+## intake ~ portion size neural contrast X meal portion size
+## run each model with and without the quadratic interaction
+PS_roi1 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_1 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_LargevSmall)
+PS_roi1_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_1 + I(ps_prop*ps_prop)*Mean_1 + (1 | sub), data = intake_long_LargevSmall)
+
+PS_roi2 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_2 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_LargevSmall)
+PS_roi2_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_2 + I(ps_prop*ps_prop)*Mean_2 + (1 | sub), data = intake_long_LargevSmall)
+
+PS_roi4 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_4 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_LargevSmall)
+PS_roi4_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_4 + I(ps_prop*ps_prop)*Mean_4 + (1 | sub), data = intake_long_LargevSmall)
+
+PS_roi8 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_8 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_LargevSmall)
+PS_roi8_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_8 + I(ps_prop*ps_prop)*Mean_8 + (1 | sub), data = intake_long_LargevSmall)
+
+PS_roi16 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_16 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_LargevSmall)
+PS_roi16_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_16 + I(ps_prop*ps_prop)*Mean_16 + (1 | sub), data = intake_long_LargevSmall)
+
+PS_roi32 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_32 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_LargevSmall)
+PS_roi32_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_32 + I(ps_prop*ps_prop)*Mean_32 + (1 | sub), data = intake_long_LargevSmall)
+
+PS_roi64 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_64 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_LargevSmall)
+PS_roi64_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_64 + I(ps_prop*ps_prop)*Mean_64 + (1 | sub), data = intake_long_LargevSmall)
+
+PS_roi128 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_128 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_LargevSmall)
+PS_roi128_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_128 + I(ps_prop*ps_prop)*Mean_128 + (1 | sub), data = intake_long_LargevSmall)
+
+PS_roi256 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_256 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_LargevSmall)
+PS_roi256_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_256 + I(ps_prop*ps_prop)*Mean_256 + (1 | sub), data = intake_long_LargevSmall)
+
+PS_roi512 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_512 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_LargevSmall)
+PS_roi512_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_512 + I(ps_prop*ps_prop)*Mean_512 + (1 | sub), data = intake_long_LargevSmall)
+
+PS_roi1024 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_1024 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_LargevSmall)
+PS_roi1024_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_1024 + I(ps_prop*ps_prop)*Mean_1024 + (1 | sub), data = intake_long_LargevSmall)
+
+# summaries
+anova(PS_roi1, PS_roi1_q) # test whether quadratic interaction improves model fit -- it does, include it 
+summary(PS_roi1_q) # result - brain moderates linear and quad
+
+anova(PS_roi2, PS_roi2_q) # test whether quadratic interaction improves model fit -- it does not, don't include it 
+summary(PS_roi2) # result - brain moderates linear
+
+anova(PS_roi4, PS_roi4_q) # test whether quadratic interaction improves model fit -- it does not, don't include it 
+summary(PS_roi4) # null
+
+anova(PS_roi8, PS_roi8_q) # test whether quadratic interaction improves model fit -- it does, include it 
+summary(PS_roi8_q) # result - brain moderates linear and quad
+
+anova(PS_roi16, PS_roi16_q) # test whether quadratic interaction improves model fit -- it does not, don't include it 
+summary(PS_roi16) # null
+
+anova(PS_roi32, PS_roi32_q) # test whether quadratic interaction improves model fit -- it does, include it 
+summary(PS_roi32_q) # trend - brain moderates linear (trend) and quad (trend)
+
+anova(PS_roi64, PS_roi64_q) # test whether quadratic interaction improves model fit -- it does not, don't include it 
+summary(PS_roi64) # null
+
+anova(PS_roi128, PS_roi128_q) # test whether quadratic interaction improves model fit -- it does not, don't include it 
+summary(PS_roi128) # null
+
+anova(PS_roi256, PS_roi256_q) # test whether quadratic interaction improves model fit -- it does not, don't include it 
+summary(PS_roi256) # null
+
+anova(PS_roi512, PS_roi512_q) # test whether quadratic interaction improves model fit -- it does, include it 
+summary(PS_roi512_q) # result - brain moderates linear and quad (trend)
+
+anova(PS_roi1024, PS_roi1024_q) # test whether quadratic interaction improves model fit -- it does, include it 
+summary(PS_roi1024_q) # result - brain moderates linear and quad (trend)
+
+```
