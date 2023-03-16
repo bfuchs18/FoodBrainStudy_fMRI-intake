@@ -1,0 +1,56 @@
+---
+title: "cerebellum-intake_plot"
+author: "baf44"
+date: "1/31/2023"
+output: html_document
+---
+
+```{r import and subset datasets, include=FALSE}
+
+# import covariate files used in analyses
+betas <- read.delim("data/raw/cerebellum_betas.txt")
+
+# import intake data
+feis_data <- read.csv("data/generated/intake_feis.csv")
+feis_data <- feis_data[c("sub","led_grams_ps_lin")]
+
+# import anthro data
+anthro_data <- read_sav("data/raw/anthro_data.sav")
+anthro_data <- anthro_data[c("id","risk_status_mom")]
+colnames(anthro_data)[1] <- "sub"
+```
+
+
+```{r cars}
+library(stringr)
+
+# clean betas dataframe
+colnames(betas)[1] <- "sub" #set column name
+colnames(betas)[2] <- "betas" #set column name
+betas$betas_temp <- str_trim(betas$betas) # removes white space at start of string
+betas$betas_2 <- as.numeric(sub(" .*", "", betas$betas_temp)) # remove everything every " ", make numeric
+
+# add bodyfat % to EDcon_bodyfat_beta 
+combined <- merge(betas, feis_data, by="sub")
+combined <- merge(combined, anthro_data, by="sub")
+```
+
+## Plot
+
+```{r pressure, echo=FALSE}
+library(ggplot2)
+
+# to color points by risk in plot, add aes(..., col = risk_status_mom)
+combined$risk_status_mom <- as.factor(combined$risk_status_mom)
+
+ggplot(combined, aes(x=led_grams_ps_lin, y=betas_2)) + 
+  geom_point()+
+  geom_smooth(method=lm, formula = y ~ x, color="black") +
+  labs(title="Cerebellum portion size response vs. intake portion size response",
+       x="Linear portion size slope for Low ED foods (grams)", y = "BOLD response to Large - Small Low ED foods") + 
+  theme(axis.text.x = element_text(size=12)) +
+  theme(axis.text.y = element_text(size=12)) +
+  theme(axis.title=element_text(size=12,face="bold"))
+
+```
+
