@@ -36,11 +36,11 @@ LargevSmall_betas_clean<-LargevSmall_betas[!(LargevSmall_betas$File=="File"),]
 HighvLow_betas_clean$sub <- sapply(str_split(HighvLow_betas_clean$File, "/"), `[`, 12)
 LargevSmall_betas_clean$sub <- sapply(str_split(LargevSmall_betas_clean$File, "/"), `[`, 12)
 
-# extract ID from sub-XXX
+# remove "sub-" from "sub-XXX" to isolate ID
 HighvLow_betas_clean$sub <- as.numeric(sub("sub-", "", HighvLow_betas_clean$sub))
 LargevSmall_betas_clean$sub <- as.numeric(sub("sub-", "", LargevSmall_betas_clean$sub))
 
-# remove columns
+# remove File and Sub.brick columns
 HighvLow_betas_clean = subset(HighvLow_betas_clean, select = -c(File, Sub.brick))
 LargevSmall_betas_clean = subset(LargevSmall_betas_clean, select = -c(File, Sub.brick))
 ```
@@ -48,19 +48,14 @@ LargevSmall_betas_clean = subset(LargevSmall_betas_clean, select = -c(File, Sub.
 ```{r concat intake and brain data, include=FALSE}
 
 # left join -- only retain subjects who have brain data
-intake_long_HighvLow <- left_join(HighvLow_betas_clean, intake_long, by="sub")
-intake_long_LargevSmall <- left_join(LargevSmall_betas_clean, intake_long, by="sub")
-
-risk_LargevSmall <- left_join(LargevSmall_betas_clean, risk, by=c('sub'='id'))
-risk_HighvLow <- left_join(HighvLow_betas_clean, risk, by=c('sub'='id'))
+intake_long_HighvLow <- left_join(HighvLow_betas_clean, intake_long, by="sub", multiple = "all")
+intake_long_LargevSmall <- left_join(LargevSmall_betas_clean, intake_long, by="sub", multiple = "all")
 
 
 # convert roi columns to numeric
 cols.num <- c("Mean_1","Mean_2", "Mean_4", "Mean_8", "Mean_16", "Mean_32", "Mean_64", "Mean_128", "Mean_256", "Mean_512", "Mean_1024")
 intake_long_HighvLow[cols.num] <- sapply(intake_long_HighvLow[cols.num],as.numeric)
 intake_long_LargevSmall[cols.num] <- sapply(intake_long_LargevSmall[cols.num],as.numeric)
-risk_LargevSmall[cols.num] <- sapply(risk_LargevSmall[cols.num],as.numeric)
-risk_HighvLow[cols.num] <- sapply(risk_HighvLow[cols.num],as.numeric)
 
 ```
 
@@ -81,160 +76,296 @@ risk_HighvLow[cols.num] <- sapply(risk_HighvLow[cols.num],as.numeric)
 
 ```{r mixed models - PS response vs PSE, include=TRUE}
 
-#### Intake model ####
-## mixed effects models with and without quadratic term (no brain data)
-mod <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop + (1 | sub), data = intake_long)
-mod_quad <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop + I(ps_prop*ps_prop) + (1 | sub), data = intake_long)
-anova(mod, mod_quad) # test whether adding quadratic improves model fit -- it does, so include quadratic term in ROI analyses 
-
 #### ROI analyses ####
-## intake ~ portion size neural contrast X meal portion size
-## run each model with and without the quadratic interaction
-PS_roi1 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_1 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_LargevSmall)
+
+## run each model with BOLD*linear term, BOLD*quadratic term, covariates
 PS_roi1_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_1 + I(ps_prop*ps_prop)*Mean_1 + (1 | sub), data = intake_long_LargevSmall)
-
-PS_roi2 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_2 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_LargevSmall)
 PS_roi2_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_2 + I(ps_prop*ps_prop)*Mean_2 + (1 | sub), data = intake_long_LargevSmall)
-
-PS_roi4 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_4 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_LargevSmall)
 PS_roi4_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_4 + I(ps_prop*ps_prop)*Mean_4 + (1 | sub), data = intake_long_LargevSmall)
-
-PS_roi8 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_8 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_LargevSmall)
 PS_roi8_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_8 + I(ps_prop*ps_prop)*Mean_8 + (1 | sub), data = intake_long_LargevSmall)
-
-PS_roi16 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_16 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_LargevSmall)
 PS_roi16_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_16 + I(ps_prop*ps_prop)*Mean_16 + (1 | sub), data = intake_long_LargevSmall)
-
-PS_roi32 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_32 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_LargevSmall)
 PS_roi32_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_32 + I(ps_prop*ps_prop)*Mean_32 + (1 | sub), data = intake_long_LargevSmall)
-
-PS_roi64 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_64 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_LargevSmall)
 PS_roi64_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_64 + I(ps_prop*ps_prop)*Mean_64 + (1 | sub), data = intake_long_LargevSmall)
-
-PS_roi128 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_128 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_LargevSmall)
 PS_roi128_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_128 + I(ps_prop*ps_prop)*Mean_128 + (1 | sub), data = intake_long_LargevSmall)
-
-PS_roi256 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_256 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_LargevSmall)
 PS_roi256_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_256 + I(ps_prop*ps_prop)*Mean_256 + (1 | sub), data = intake_long_LargevSmall)
-
-PS_roi512 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_512 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_LargevSmall)
 PS_roi512_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_512 + I(ps_prop*ps_prop)*Mean_512 + (1 | sub), data = intake_long_LargevSmall)
-
-PS_roi1024 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_1024 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_LargevSmall)
 PS_roi1024_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_1024 + I(ps_prop*ps_prop)*Mean_1024 + (1 | sub), data = intake_long_LargevSmall)
 
 # summaries
-anova(PS_roi1, PS_roi1_q) # test whether quadratic interaction improves model fit -- it does not, don't include it
-summary(PS_roi1) # null
-
-anova(PS_roi2, PS_roi2_q) # test whether quadratic interaction improves model fit -- it does not, don't include it 
-summary(PS_roi2) # null
-
-anova(PS_roi4, PS_roi4_q) # test whether quadratic interaction improves model fit -- it does not, don't include it 
-summary(PS_roi4) # trend
-
-anova(PS_roi8, PS_roi8_q) # test whether quadratic interaction improves model fit -- it does, include it 
+summary(PS_roi1_q) # quadratic terms not significant
+summary(PS_roi2_q) # quadratic terms not significant
+summary(PS_roi4_q) # quadratic terms not significant
 summary(PS_roi8_q) # result - brain moderates linear and quad
-
-anova(PS_roi16, PS_roi16_q) # test whether quadratic interaction improves model fit -- it does, include it 
-summary(PS_roi16) # trend .11
-
-anova(PS_roi32, PS_roi32_q) # test whether quadratic interaction improves model fit -- it does, include it 
+summary(PS_roi16_q) # result - brain moderates quad
 summary(PS_roi32_q) # result - brain moderates quad
+summary(PS_roi64_q) # quadratic terms not significant
+summary(PS_roi128_q) # result - brain moderates linear and quad
+summary(PS_roi256_q) # result - brain moderates linear and quad
+summary(PS_roi512_q) # quadratic terms not significant
+summary(PS_roi1024_q) # quadratic terms not significant
 
-anova(PS_roi64, PS_roi64_q) # test whether quadratic interaction improves model fit -- it does not, don't include it 
-summary(PS_roi64) # null
+# For ROIs where quadtratic terms are not significant, remove them for parsimony
+PS_roi1_l <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_1 + (1 | sub), data = intake_long_LargevSmall)
+PS_roi2_l <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_2 + (1 | sub), data = intake_long_LargevSmall)
+PS_roi4_l <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_4 + (1 | sub), data = intake_long_LargevSmall)
+PS_roi64_l <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_64 + (1 | sub), data = intake_long_LargevSmall)
+PS_roi512_l <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_512 + (1 | sub), data = intake_long_LargevSmall)
+PS_roi1024_l <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_1024 + (1 | sub), data = intake_long_LargevSmall)
 
-anova(PS_roi128, PS_roi128_q) # test whether quadratic interaction improves model fit -- it does not, don't include it 
-summary(PS_roi128) # null
-
-anova(PS_roi256, PS_roi256_q) # test whether quadratic interaction improves model fit -- it does, include it 
-summary(PS_roi256) # null
-
-anova(PS_roi512, PS_roi512_q) # test whether quadratic interaction improves model fit -- it does not, don't include it 
-summary(PS_roi512) # null
-
-anova(PS_roi1024, PS_roi1024_q) # test whether quadratic interaction improves model fit -- it does not, don't include it 
-summary(PS_roi1024) # null
-
+# summaries
+summary(PS_roi1_l) # null
+summary(PS_roi2_l) # null
+summary(PS_roi4_l) # trend - brain moderates linear
+summary(PS_roi64_l) # null
+summary(PS_roi512_l) # null
+summary(PS_roi1024_l) # trend - brain moderates linear
 ```
 
 ```{r mixed models - ED response vs PSE, include=TRIE}
 
-#### Intake model ####
-## mixed effects models with and without quadratic term (no brain data)
-mod <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop + (1 | sub), data = intake_long)
-mod_quad <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop + I(ps_prop*ps_prop) + (1 | sub), data = intake_long)
-anova(mod, mod_quad) # test whether adding quadratic improves model fit -- it does, so include quadratic term in ROI analyses 
 
 #### ROI analyses ####
-## intake ~ energy density neural contrast X meal portion size
-## run each model with and without the quadratic interaction
-ED_roi1 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_1 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_HighvLow)
+
+## run each model with BOLD*linear term, BOLD*quadratic term, covariates
 ED_roi1_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_1 + I(ps_prop*ps_prop)*Mean_1 + (1 | sub), data = intake_long_HighvLow)
-
-ED_roi2 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_2 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_HighvLow)
 ED_roi2_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_2 + I(ps_prop*ps_prop)*Mean_2 + (1 | sub), data = intake_long_HighvLow)
-
-ED_roi4 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_4 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_HighvLow)
 ED_roi4_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_4 + I(ps_prop*ps_prop)*Mean_4 + (1 | sub), data = intake_long_HighvLow)
-
-ED_roi8 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_8 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_HighvLow)
 ED_roi8_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_8 + I(ps_prop*ps_prop)*Mean_8 + (1 | sub), data = intake_long_HighvLow)
-
-ED_roi16 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_16 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_HighvLow)
 ED_roi16_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_16 + I(ps_prop*ps_prop)*Mean_16 + (1 | sub), data = intake_long_HighvLow)
-
-ED_roi32 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_32 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_HighvLow)
 ED_roi32_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_32 + I(ps_prop*ps_prop)*Mean_32 + (1 | sub), data = intake_long_HighvLow)
-
-ED_roi64 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_64 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_HighvLow)
 ED_roi64_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_64 + I(ps_prop*ps_prop)*Mean_64 + (1 | sub), data = intake_long_HighvLow)
-
-ED_roi128 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_128 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_HighvLow)
 ED_roi128_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_128 + I(ps_prop*ps_prop)*Mean_128 + (1 | sub), data = intake_long_HighvLow)
-
-ED_roi256 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_256 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_HighvLow)
 ED_roi256_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_256 + I(ps_prop*ps_prop)*Mean_256 + (1 | sub), data = intake_long_HighvLow)
-
-ED_roi512 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_512 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_HighvLow)
 ED_roi512_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_512 + I(ps_prop*ps_prop)*Mean_512 + (1 | sub), data = intake_long_HighvLow)
-
-ED_roi1024 <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_1024 + I(ps_prop*ps_prop) + (1 | sub), data = intake_long_HighvLow)
 ED_roi1024_q <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_1024 + I(ps_prop*ps_prop)*Mean_1024 + (1 | sub), data = intake_long_HighvLow)
 
 # summaries
-anova(ED_roi1, ED_roi1_q) # test whether quadratic interaction improves model fit -- it does, include it 
-summary(ED_roi1_q) # result - brain moderates linear and quad
-
-anova(ED_roi2, ED_roi2_q) # test whether quadratic interaction improves model fit -- it does not, don't include it 
-summary(ED_roi2) # result - brain moderates linear
-
-anova(ED_roi4, ED_roi4_q) # test whether quadratic interaction improves model fit -- it does not, don't include it 
-summary(ED_roi4) # null
-
-anova(ED_roi8, ED_roi8_q) # test whether quadratic interaction improves model fit -- it does, include it 
+summary(ED_roi1_q) # trend - brain moderates quad
+summary(ED_roi2_q) # quadratic terms not significant
+summary(ED_roi4_q) # quadratic terms not significant
 summary(ED_roi8_q) # result - brain moderates linear and quad
-
-anova(ED_roi16, ED_roi16_q) # test whether quadratic interaction improves model fit -- it does not, don't include it 
-summary(ED_roi16) # null
-
-anova(ED_roi32, ED_roi32_q) # test whether quadratic interaction improves model fit -- it does, include it 
+summary(ED_roi16_q) # quadratic terms not significant
 summary(ED_roi32_q) # trend - brain moderates linear (trend) and quad (trend)
-
-anova(ED_roi64, ED_roi64_q) # test whether quadratic interaction improves model fit -- it does not, don't include it 
-summary(ED_roi64) # null
-
-anova(ED_roi128, ED_roi128_q) # test whether quadratic interaction improves model fit -- it does not, don't include it 
-summary(ED_roi128) # null
-
-anova(ED_roi256, ED_roi256_q) # test whether quadratic interaction improves model fit -- it does not, don't include it 
-summary(ED_roi256) # null
-
-anova(ED_roi512, ED_roi512_q) # test whether quadratic interaction improves model fit -- it does, include it 
+summary(ED_roi64_q) # quadratic terms not significant
+summary(ED_roi128_q) # quadratic terms not significant
+summary(ED_roi256_q) # quadratic terms not significant
 summary(ED_roi512_q) # result - brain moderates linear and quad (trend)
+summary(ED_roi1024_q) # quadratic terms not significant
 
-anova(ED_roi1024, ED_roi1024_q) # test whether quadratic interaction improves model fit -- it does, include it 
-summary(ED_roi1024_q) # result - brain moderates linear and quad (trend)
+# For ROIs where quadtratic terms are not significant, remove them for parsimony (what about when quad interaction is "trending" i.e., ROI 32, 512)
+ED_roi1_l <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_1 + (1 | sub), data = intake_long_HighvLow)
+ED_roi2_l <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_2 + (1 | sub), data = intake_long_HighvLow)
+ED_roi4_l <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_4 + (1 | sub), data = intake_long_HighvLow)
+ED_roi16_l <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_16 + (1 | sub), data = intake_long_HighvLow)
+#ED_roi32_l <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_32 + (1 | sub), data = intake_long_HighvLow)
+ED_roi64_l <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_64 + (1 | sub), data = intake_long_HighvLow)
+ED_roi128_l <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_128 + (1 | sub), data = intake_long_HighvLow)
+ED_roi256_l <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_256 + (1 | sub), data = intake_long_HighvLow)
+#ED_roi512_l <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_512 + (1 | sub), data = intake_long_HighvLow)
+ED_roi1024_l <- lmer(grams ~ preFF + avg_vas + meal_order + ps_prop*Mean_1024 + (1 | sub), data = intake_long_HighvLow)
+
+# summaries
+summary(ED_roi1_l) # null
+summary(ED_roi2_l) # brain moderates linear
+summary(ED_roi4_l) # null
+summary(ED_roi16_l) # null
+#summary(ED_roi32_l) # null
+summary(ED_roi64_l) # null
+summary(ED_roi128_l) # null
+summary(ED_roi256_l) # null
+#summary(ED_roi512_l) # null
+summary(ED_roi1024_l) # null
+
+```
+
+```{r plots, include=TRUE}
+library(tidyverse)
+library(sjPlot)
+
+
+#### PS contrast - roi8 ####
+
+# split into tertiles by PS response
+intake_long_LargevSmall <- intake_long_LargevSmall %>%
+    mutate(tertile_8 = ntile(Mean_8, 3))
+
+# Get mean & standard deviation of grams intake by group
+mean_8 <- intake_long_LargevSmall %>% 
+  drop_na(grams) %>%
+  group_by(ps_prop, tertile_8) %>%
+  summarise_at(vars(grams),
+               list(mean = mean,
+                    sd = sd)) %>% 
+  as.data.frame()
+
+# change tertile and ps_prop to factors
+mean_8$tertile_8 <- as.factor(mean_8$tertile_8)
+mean_8$ps_prop <- as.factor(mean_8$ps_prop)
+
+# plot
+ggplot(mean_8, aes(x = ps_prop, y = mean, color = tertile_8, group = tertile_8)) +
+  #geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd)) +
+  geom_point() + geom_line() +
+  ylim(300, 600) +
+  ggtitle("PSE by R middle insula PS response") +
+  ylab("Intake (grams)") +
+  xlab("Meal portion size (proportion)") +
+  labs(color = "neural PS response (tertile)")
+
+
+
+#### PS contrast - roi32 ####
+
+# split into tertiles by PS response
+intake_long_LargevSmall <- intake_long_LargevSmall %>%
+    mutate(tertile_32 = ntile(Mean_32, 3))
+
+# Get mean & standard deviation of grams intake by group
+mean_32 <- intake_long_LargevSmall %>% 
+  drop_na(grams) %>%
+  group_by(ps_prop, tertile_32) %>%
+  summarise_at(vars(grams),
+               list(mean = mean,
+                    sd = sd)) %>% 
+  as.data.frame()
+
+# change tertile and ps_prop to factors
+mean_32$tertile_32 <- as.factor(mean_32$tertile_32)
+mean_32$ps_prop <- as.factor(mean_32$ps_prop)
+
+# plot
+ggplot(mean_32, aes(x = ps_prop, y = mean, color = tertile_32, group = tertile_32)) +
+  #geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd)) +
+  geom_point() + geom_line() +
+  ylim(300, 600) +
+  ggtitle("PSE by L caudate PS response") +
+  ylab("Intake (grams)") +
+  xlab("Meal portion size (proportion)") +
+  labs(color = "neural PS response (tertile)")
+
+
+
+#### PS contrast - roi256 ####
+
+# split into tertiles by PS response
+intake_long_LargevSmall <- intake_long_LargevSmall %>%
+    mutate(tertile_256 = ntile(Mean_256, 3))
+
+# Get mean & standard deviation of grams intake by group
+mean_256 <- intake_long_LargevSmall %>% 
+  drop_na(grams) %>%
+  group_by(ps_prop, tertile_256) %>%
+  summarise_at(vars(grams),
+               list(mean = mean,
+                    sd = sd)) %>% 
+  as.data.frame()
+
+# change tertile and ps_prop to factors
+mean_256$tertile_256 <- as.factor(mean_256$tertile_256)
+mean_256$ps_prop <- as.factor(mean_256$ps_prop)
+
+# plot
+ggplot(mean_256, aes(x = ps_prop, y = mean, color = tertile_256, group = tertile_256)) +
+  #geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd)) +
+  geom_point() + geom_line() +
+  ylim(300, 600) +
+  ggtitle("PSE by vmPFC PS response") +
+  ylab("Intake (grams)") +
+  xlab("Meal portion size (proportion)") +
+  labs(color = "neural PS response (tertile)")
+
+
+
+#### PS contrast - roi1024 ####
+
+# split into tertiles by PS response
+intake_long_LargevSmall <- intake_long_LargevSmall %>%
+    mutate(tertile_1024 = ntile(Mean_1024, 3))
+
+# Get mean & standard deviation of grams intake by group
+mean_1024 <- intake_long_LargevSmall %>% 
+  drop_na(grams) %>%
+  group_by(ps_prop, tertile_1024) %>%
+  summarise_at(vars(grams),
+               list(mean = mean,
+                    sd = sd)) %>% 
+  as.data.frame()
+
+# change tertile and ps_prop to factors
+mean_1024$tertile_1024 <- as.factor(mean_1024$tertile_1024)
+mean_1024$ps_prop <- as.factor(mean_1024$ps_prop)
+
+# plot
+ggplot(mean_1024, aes(x = ps_prop, y = mean, color = tertile_1024, group = tertile_1024)) +
+  #geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd)) +
+  geom_point() + geom_line() +
+  ylim(300, 600) +
+  ggtitle("PSE by R middle insula (1024) PS response") +
+  ylab("Intake (grams)") +
+  xlab("Meal portion size (proportion)") +
+  labs(color = "neural PS response (tertile)")
+
+
+
+#### ED contrast - roi2 ####
+
+# split into tertiles by ED response
+intake_long_HighvLow <- intake_long_HighvLow %>%
+    mutate(tertile_2 = ntile(Mean_2, 3))
+
+# Get mean & standard deviation of grams intake by group
+mean_2 <- intake_long_HighvLow %>% 
+  drop_na(grams) %>%
+  group_by(ps_prop, tertile_2) %>%
+  summarise_at(vars(grams),
+               list(mean = mean,
+                    sd = sd)) %>% 
+  as.data.frame()
+
+# change tertile and ps_prop to factors
+mean_2$tertile_2 <- as.factor(mean_2$tertile_2)
+mean_2$ps_prop <- as.factor(mean_2$ps_prop)
+
+# plot
+ggplot(mean_2, aes(x = ps_prop, y = mean, color = tertile_2, group = tertile_2)) +
+  #geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd)) +
+  geom_point() + geom_line() +
+  ylim(300, 600) +
+  ggtitle("PSE by R cerebellum ED response") +
+  ylab("Intake (grams)") +
+  xlab("Meal portion size (proportion)") +
+  labs(color = "neural ED response (tertile)")
+
+
+
+
+#### ED contrast - roi8 ####
+
+# split into tertiles by PS response
+intake_long_HighvLow <- intake_long_HighvLow %>%
+    mutate(tertile_8 = ntile(Mean_8, 3))
+
+# Get mean & standard deviation of grams intake by group
+mean_8_ED <- intake_long_HighvLow %>% 
+  drop_na(grams) %>%
+  group_by(ps_prop, tertile_8) %>%
+  summarise_at(vars(grams),
+               list(mean = mean,
+                    sd = sd)) %>% 
+  as.data.frame()
+
+# change tertile and ps_prop to factors
+mean_8_ED$tertile_8 <- as.factor(mean_8$tertile_8)
+mean_8_ED$ps_prop <- as.factor(mean_8$ps_prop)
+
+# plot
+ggplot(mean_8_ED, aes(x = ps_prop, y = mean, color = tertile_8, group = tertile_8)) +
+  #geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd)) +
+  geom_point() + geom_line() +
+  ylim(300, 600) +
+  ggtitle("PSE by R middle insula ED response") +
+  ylab("Intake (grams)") +
+  xlab("Meal portion size (proportion)") +
+  labs(color = "neural ED response (tertile)")
 
 ```
