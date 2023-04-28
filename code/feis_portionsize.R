@@ -21,6 +21,7 @@
 library(feisr)
 library(lme4)
 library(lmerTest)
+library(dplyr)
 
 # set project directory
 source("code/setup_data.R")
@@ -35,9 +36,9 @@ grams_ps_psquad_feis_data <- data.frame(row.names(slopes(grams_ps_psquad_feis)),
 names(grams_ps_psquad_feis_data) <- c('sub', 'grams_int', 'grams_ps_lin', 'grams_ps_quad')
 
 # feis model - all foods - kcal
-kcal_ps_feis <- feis(kcal ~ preFF + avg_vas + meal_order | ps_prop, data = intake_long, id = "sub")
+kcal_ps_feis <- feis(kcal ~ preFF + avg_vas + meal_order | ps_prop + I(ps_prop*ps_prop), data = intake_long, id = "sub")
 kcal_ps_feis_data <- data.frame(row.names(slopes(kcal_ps_feis)), slopes(kcal_ps_feis))
-names(kcal_ps_feis_data) <- c('sub', 'kcal_int', 'kcal_ps_lin')
+names(kcal_ps_feis_data) <- c('sub', 'kcal_int', 'kcal_ps_lin', 'kcal_ps_quad')
 
 ## individual PS slopes for intake - low ED foods ####
 
@@ -73,8 +74,8 @@ hed_kcal_ps_feis <- feis(hed_kcal ~ preFF + hed_vas + meal_order | ps_prop, data
 hed_kcal_ps_feis_data <- data.frame(row.names(slopes(hed_kcal_ps_feis)), slopes(hed_kcal_ps_feis))
 names(hed_kcal_ps_feis_data) <- c('sub', 'hed_kcal_int', 'hed_kcal_ps_lin')
 
-# merge datasets
-intake_feis_data <- merge(grams_ps_psquad_feis_data, kcal_ps_feis_data, by = 'sub', all = TRUE) #all = T will include all rows in both dataframes*
+# merge datasets with all = T to include all rows in both dataframes*
+intake_feis_data <- merge(grams_ps_psquad_feis_data, kcal_ps_feis_data, by = 'sub', all = TRUE)
 intake_feis_data <- merge(intake_feis_data, led_grams_ps_feis_data, by = 'sub', all = TRUE)
 intake_feis_data <- merge(intake_feis_data, led_kcal_ps_feis_data, by = 'sub', all = TRUE)
 intake_feis_data <- merge(intake_feis_data, hed_grams_ps_feis_data, by = 'sub', all = TRUE)
@@ -84,5 +85,4 @@ intake_feis_data <- merge(intake_feis_data, hed_kcal_ps_feis_data, by = 'sub', a
 write.csv(intake_feis_data,"data/generated/intake_feis.csv", row.names = TRUE)
 
 #### * subs 120 and 128 having missing data for 1 meal each, and therefore do not have enough
-##    datapoints to be included in grams_ps_psquad_feis (which includes quad param). However,
-##    they have enough data to be included in kcal and hed/led models (which do not include quad param)
+##    datapoints to be included in grams_ps_psquad_feis and kcal_ps_psquad_feis (which includes quadratic parameter)
