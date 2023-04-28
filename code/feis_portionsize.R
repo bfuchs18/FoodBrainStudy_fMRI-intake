@@ -64,12 +64,20 @@ hed_kcal_ps_feis <- feis(hed_kcal ~ preFF + hed_vas + meal_order | ps_prop + I(p
 hed_kcal_ps_feis_data <- data.frame(row.names(slopes(hed_kcal_ps_feis)), slopes(hed_kcal_ps_feis))
 names(hed_kcal_ps_feis_data) <- c('sub', 'hed_kcal_int', 'hed_kcal_ps_lin', 'hed_kcal_ps_quad')
 
+############ Portion meal difference scores ############
+r01_intake$grams_ps3v1 <- r01_intake$ps3_total_g - r01_intake$ps1_total_g
+r01_intake$grams_ps4v3 <- r01_intake$ps4_total_g - r01_intake$ps3_total_g
+r01_intake$kcal_ps3v1 <- r01_intake$ps3_total_kcal - r01_intake$ps1_total_kcal
+r01_intake$kcal_ps4v3 <- r01_intake$ps4_total_kcal - r01_intake$ps3_total_kcal
+
+############ merge datasets ############
 # merge datasets with all = T to include all rows in both dataframes*
 intake_feis_data <- merge(grams_ps_psquad_feis_data, kcal_ps_feis_data, by = 'sub', all = TRUE)
 intake_feis_data <- merge(intake_feis_data, led_grams_ps_feis_data, by = 'sub', all = TRUE)
 intake_feis_data <- merge(intake_feis_data, led_kcal_ps_feis_data, by = 'sub', all = TRUE)
 intake_feis_data <- merge(intake_feis_data, hed_grams_ps_feis_data, by = 'sub', all = TRUE)
 intake_feis_data <- merge(intake_feis_data, hed_kcal_ps_feis_data, by = 'sub', all = TRUE)
+intake_feis_data <- merge(intake_feis_data, select(r01_intake, sub, grams_ps3v1, grams_ps4v3, kcal_ps3v1, kcal_ps4v3), by = "sub")
 
 # write database
 write.csv(intake_feis_data,"data/generated/intake_feis.csv", row.names = TRUE)
