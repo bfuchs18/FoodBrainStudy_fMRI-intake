@@ -77,7 +77,7 @@ intake_feis_data <- merge(intake_feis_data, led_grams_ps_feis_data, by = 'sub', 
 intake_feis_data <- merge(intake_feis_data, led_kcal_ps_feis_data, by = 'sub', all = TRUE)
 intake_feis_data <- merge(intake_feis_data, hed_grams_ps_feis_data, by = 'sub', all = TRUE)
 intake_feis_data <- merge(intake_feis_data, hed_kcal_ps_feis_data, by = 'sub', all = TRUE)
-intake_feis_data <- merge(intake_feis_data, select(r01_intake, sub, grams_ps3v1, grams_ps4v3, kcal_ps3v1, kcal_ps4v3), by = "sub")
+intake_feis_data <- merge(intake_feis_data, select(r01_intake, sub, grams_ps3v1, grams_ps4v3, kcal_ps3v1, kcal_ps4v3, ps1_total_g, ps1_total_kcal), by = "sub")
 
 # write database
 write.csv(intake_feis_data,"data/generated/intake_feis.csv", row.names = TRUE)
