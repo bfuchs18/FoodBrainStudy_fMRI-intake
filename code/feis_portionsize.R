@@ -1,5 +1,5 @@
 # This script report was written by Alaina Pearce and Bari Fuchs in August 2022 to
-# extract individual poriton size effect estimates.
+# extract individual portion size effect estimates.
 #
 #     Copyright (C) 2022 Bari Fuchs
 #
@@ -26,26 +26,41 @@ library(dplyr)
 # set project directory
 source("code/setup_data.R")
 
-############ fixed effects individual slopes (feis) ############
+############ fixed effects individual slope models (feis) ############
 
-## individual PS slopes for intake - all foods ####
+#### estimate linear slope only ####
 
-# feis model - all foods - grams
+# predict overall intake (g) - linear term
+grams_ps_feis <- feis(grams ~ preFF + avg_vas + meal_order | ps_prop , data = intake_long, id = "sub")
+grams_ps_feis_data <- data.frame(row.names(slopes(grams_ps_feis)), slopes(grams_ps_feis))
+names(grams_ps_feis_data) <- c('sub', 'l_grams_int', 'l_grams_ps_lin')
+
+# predict overall intake (kcal) - linear term
+kcal_ps_feis <- feis(kcal ~ preFF + avg_vas + meal_order | ps_prop , data = intake_long, id = "sub")
+kcal_ps_feis_data <- data.frame(row.names(slopes(kcal_ps_feis)), slopes(kcal_ps_feis))
+names(kcal_ps_feis_data) <- c('sub', 'l_kcal_int', 'l_kcal_ps_lin')
+
+#### estimate linear and quadratic slopes ####
+
+# predict overall intake (g) - linear and quad term
 grams_ps_psquad_feis <- feis(grams ~ preFF + avg_vas + meal_order | ps_prop + I(ps_prop*ps_prop), data = intake_long, id = "sub")
 grams_ps_psquad_feis_data <- data.frame(row.names(slopes(grams_ps_psquad_feis)), slopes(grams_ps_psquad_feis))
-names(grams_ps_psquad_feis_data) <- c('sub', 'grams_int', 'grams_ps_lin', 'grams_ps_quad')
+names(grams_ps_psquad_feis_data) <- c('sub', 'q_grams_int', 'q_grams_ps_lin', 'q_grams_ps_quad')
 
-# feis model - all foods - kcal
-kcal_ps_feis <- feis(kcal ~ preFF + avg_vas + meal_order | ps_prop + I(ps_prop*ps_prop), data = intake_long, id = "sub")
-kcal_ps_feis_data <- data.frame(row.names(slopes(kcal_ps_feis)), slopes(kcal_ps_feis))
-names(kcal_ps_feis_data) <- c('sub', 'kcal_int', 'kcal_ps_lin', 'kcal_ps_quad')
+# predict overall intake (kcal) - linear and quad term
+kcal_ps_psquad_feis <- feis(kcal ~ preFF + avg_vas + meal_order | ps_prop + I(ps_prop*ps_prop), data = intake_long, id = "sub")
+kcal_ps_psquad_feis_data <- data.frame(row.names(slopes(kcal_ps_psquad_feis)), slopes(kcal_ps_psquad_feis))
+names(kcal_ps_psquad_feis_data) <- c('sub', 'q_kcal_int', 'q_kcal_ps_lin', 'q_kcal_ps_quad')
 
 ############ merge datasets ############
-# merge datasets with all = T to include all rows in both dataframes*
-intake_feis_data <- merge(grams_ps_psquad_feis_data, kcal_ps_feis_data, by = 'sub', all = TRUE)
+
+# merge datasets with all = T to include all rows in both dataframes
+intake_feis_data <- merge(grams_ps_feis_data, kcal_ps_feis_data, by = 'sub', all = TRUE)
+intake_feis_data <- merge(intake_feis_data, grams_ps_psquad_feis_data, by = 'sub', all = TRUE)
+intake_feis_data <- merge(intake_feis_data, kcal_ps_psquad_feis_data, by = 'sub', all = TRUE)
 
 # write database
 write.csv(intake_feis_data,"data/generated/intake_feis.csv", row.names = TRUE)
 
-#### * subs 120 and 128 having missing data for 1 meal each, and therefore do not have enough
-#### datapoints to be included models
+#### subs 120 and 128 having missing data for 1 meal each, and therefore do not have enough
+#### datapoints to be included in models w/ quadtratic term
