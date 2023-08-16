@@ -40,37 +40,9 @@ kcal_ps_feis <- feis(kcal ~ preFF + avg_vas + meal_order | ps_prop + I(ps_prop*p
 kcal_ps_feis_data <- data.frame(row.names(slopes(kcal_ps_feis)), slopes(kcal_ps_feis))
 names(kcal_ps_feis_data) <- c('sub', 'kcal_int', 'kcal_ps_lin', 'kcal_ps_quad')
 
-## individual PS slopes for intake - low ED foods ####
-
-# feis model - low ED foods - grams
-led_grams_ps_feis <- feis(led_grams ~ preFF + led_vas + meal_order | ps_prop + I(ps_prop*ps_prop), data = intake_long, id = "sub")
-led_grams_ps_feis_data <- data.frame(row.names(slopes(led_grams_ps_feis)), slopes(led_grams_ps_feis))
-names(led_grams_ps_feis_data) <- c('sub', 'led_grams_int', 'led_grams_ps_lin', 'led_grams_ps_quad')
-
-# feis model - low ED foods - kcal
-led_kcal_ps_feis <- feis(led_kcal ~ preFF + led_vas + meal_order | ps_prop + I(ps_prop*ps_prop), data = intake_long, id = "sub")
-led_kcal_ps_feis_data <- data.frame(row.names(slopes(led_kcal_ps_feis)), slopes(led_kcal_ps_feis))
-names(led_kcal_ps_feis_data) <- c('sub', 'led_kcal_int', 'led_kcal_ps_lin', 'led_kcal_ps_quad')
-
-## individual PS slopes for intake - high ED foods ####
-
-# feis model - high ED foods - grams
-hed_grams_ps_feis <- feis(hed_grams ~ preFF + hed_vas + meal_order | ps_prop + I(ps_prop*ps_prop), data = intake_long, id = "sub")
-hed_grams_ps_feis_data <- data.frame(row.names(slopes(hed_grams_ps_feis)), slopes(hed_grams_ps_feis))
-names(hed_grams_ps_feis_data) <- c('sub', 'hed_grams_int', 'hed_grams_ps_lin', 'hed_grams_ps_quad')
-
-# feis model - high ED foods - kcal
-hed_kcal_ps_feis <- feis(hed_kcal ~ preFF + hed_vas + meal_order | ps_prop + I(ps_prop*ps_prop), data = intake_long, id = "sub")
-hed_kcal_ps_feis_data <- data.frame(row.names(slopes(hed_kcal_ps_feis)), slopes(hed_kcal_ps_feis))
-names(hed_kcal_ps_feis_data) <- c('sub', 'hed_kcal_int', 'hed_kcal_ps_lin', 'hed_kcal_ps_quad')
-
 ############ merge datasets ############
 # merge datasets with all = T to include all rows in both dataframes*
 intake_feis_data <- merge(grams_ps_psquad_feis_data, kcal_ps_feis_data, by = 'sub', all = TRUE)
-intake_feis_data <- merge(intake_feis_data, led_grams_ps_feis_data, by = 'sub', all = TRUE)
-intake_feis_data <- merge(intake_feis_data, led_kcal_ps_feis_data, by = 'sub', all = TRUE)
-intake_feis_data <- merge(intake_feis_data, hed_grams_ps_feis_data, by = 'sub', all = TRUE)
-intake_feis_data <- merge(intake_feis_data, hed_kcal_ps_feis_data, by = 'sub', all = TRUE)
 
 # write database
 write.csv(intake_feis_data,"data/generated/intake_feis.csv", row.names = TRUE)
