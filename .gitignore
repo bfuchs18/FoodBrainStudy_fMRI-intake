@@ -3,3 +3,6 @@
 .RData
 .Ruserdata
 Rplot*
+data/generated/
+*DS_Store*
+data*
