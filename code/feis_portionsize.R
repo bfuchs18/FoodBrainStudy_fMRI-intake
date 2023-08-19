@@ -26,6 +26,15 @@ library(dplyr)
 # set project directory
 source("code/setup_data.R")
 
+############ impute missing meal item measurements ############
+
+# ID 128 PS 4: missing Mac and cheese measurements
+  ## mac and cheese thrown away before post-measurements (see v5_child_notes in visit_notes.sav)
+
+# ID 058 PS 3: missing chicken nugget measurements
+  ## chicken nugget post weight error, so no value (see v5_child_notes in visit_notes.sav)
+
+
 ############ fixed effects individual slope models (feis) ############
 
 #### estimate linear slope only ####
@@ -52,6 +61,19 @@ kcal_ps_psquad_feis <- feis(kcal ~ preFF + avg_vas + meal_order | ps_prop + I(ps
 kcal_ps_psquad_feis_data <- data.frame(row.names(slopes(kcal_ps_psquad_feis)), slopes(kcal_ps_psquad_feis))
 names(kcal_ps_psquad_feis_data) <- c('sub', 'q_kcal_int', 'q_kcal_ps_lin', 'q_kcal_ps_quad')
 
+#### Calculate vertex ####
+
+# *To calculate effect of portion size by 0.33 proportion increase need to first get total quadratic effect.
+# The $\beta$ coefficient for a quadratic effect is half the change in the linear slope for a unit increase,
+# so total change in linear slope = 2 x ps_prop2. Since a 1 unit increase = 100% increase in portion, can then
+# multiply the total effect by 0.33.
+# Therefore, change in linear slope for each 33% increase in amount served = (ps_prop2 x 2) x 0.33.
+# To calculate where the slope switches from positive to negative, need to find the vertex = -ps_prop/(ps_prop2 x 2)
+
+grams_ps_psquad_feis_data$g_vertex <- -(grams_ps_psquad_feis_data$q_grams_ps_lin)/(grams_ps_psquad_feis_data$q_grams_ps_quad*2)
+kcal_ps_psquad_feis_data$kcal_vertex <- -(kcal_ps_psquad_feis_data$q_kcal_ps_lin)/(kcal_ps_psquad_feis_data$q_kcal_ps_quad*2)
+
+
 ############ merge datasets ############
 
 # merge datasets with all = T to include all rows in both dataframes
@@ -62,5 +84,3 @@ intake_feis_data <- merge(intake_feis_data, kcal_ps_psquad_feis_data, by = 'sub'
 # write database
 write.csv(intake_feis_data,"data/generated/intake_feis.csv", row.names = TRUE)
 
-#### subs 120 and 128 having missing data for 1 meal each, and therefore do not have enough
-#### datapoints to be included in models w/ quadtratic term
