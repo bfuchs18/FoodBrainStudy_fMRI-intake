@@ -24,55 +24,45 @@ library(reshape2)
 
 #### set up ####
 
-# ## 1) Demographics Data ####
-# ## a) Load Data ####
-# r01_demo <- as.data.frame(read_spss(("data/demographics_data.sav")))
-# names(r01_demo)[1] <- 'sub'
-#
-# #remove 2 that were removed for ADHD
-# r01_demo = r01_demo[r01_demo$sub != 31 & r01_demo$sub != 34, ]
-#
-# ## b) Get Variable Labels and Re-Level ####
-#
-# # risk status
-# r01_demo$risk_status_mom <- droplevels(as_factor(r01_demo$risk_status_mom))
-# r01_demo$risk_status_both <- droplevels(as_factor(r01_demo$risk_status_both))
-# r01_demo$sex <- as_factor(r01_demo$sex)
-#
-# # income
-# r01_demo$income <- ifelse(is.na(r01_demo$income), NA, ifelse(r01_demo$income < 3, '< $51,000', ifelse(r01_demo$income < 5, "$51,000 - $100,000", '>$100,000')))
-#
-# # parental ed
-# r01_demo$mom_ed <- ifelse(r01_demo$measured_parent == 0, ifelse(r01_demo$parent_ed == 0, 'High School/GED', ifelse(r01_demo$parent_ed < 3, 'AA/Technical Degree', ifelse(r01_demo$parent_ed == 3, 'Bachelor Degree', ifelse(r01_demo$parent_ed < 8, '> Bachelor Degree', 'Other/NA')))), ifelse(r01_demo$partner_ed == 0, 'High School/GED', ifelse(r01_demo$partner_ed < 3, 'AA/Technical Degree', ifelse(r01_demo$partner_ed == 3, 'Bachelor Degree', ifelse(r01_demo$partner_ed < 8, '> Bachelor Degree', 'Other/NA')))))
-#
-# r01_demo$dad_ed <- ifelse(r01_demo$measured_parent == 1, ifelse(r01_demo$parent_ed == 0, 'High School/GED', ifelse(r01_demo$parent_ed < 3, 'AA/Technical Degree', ifelse(r01_demo$parent_ed == 3, 'Bachelor Degree', ifelse(r01_demo$parent_ed < 8, '> Bachelor Degree', 'Other/NA')))), ifelse(r01_demo$partner_ed == 0, 'High School/GED', ifelse(r01_demo$partner_ed < 3, 'AA/Technical Degree', ifelse(r01_demo$partner_ed == 3, 'Bachelor Degree', ifelse(r01_demo$partner_ed < 8, '> Bachelor Degree', 'Other/NA')))))
-#
-# # race
-# r01_demo$race <- ifelse(r01_demo$race == 0, 'White/Caucasian', ifelse(r01_demo$race == 2, 'Asian', ifelse(r01_demo$race == 3, 'Black/AA', 'Other')))
-#
-# # ethnicity
-# r01_demo$ethnicity <- ifelse(r01_demo$ethnicity == 0, 'Not Hispanic/Lantinx', 'Hispanic/Lantinx')
-#
-# # tanner
-# r01_demo$pds_tanner_cat <- droplevels(as_factor(r01_demo$pds_tanner_cat))
-# r01_demo$tanner_silhouette <- ifelse(r01_demo$sex == 'Male', r01_demo$tanner_male, r01_demo$tanner_female)
-# r01_demo$tanner_silhouette <- ifelse(r01_demo$tanner_silhouette == 99, 'Skip', ifelse(r01_demo$tanner_silhouette == 1, 'Prepubertal', ifelse(r01_demo$tanner_silhouette == 2, 'Early Puberty', ifelse(r01_demo$tanner_silhouette == 3, 'Mid-Puberty', ifelse(r01_demo$tanner_silhouette == 4, 'Late Puberty', 'Postpubertal')))))
-#
-# # food insecurity
-# r01_demo$hfssm_6item_cat <- droplevels(as_factor(r01_demo$hfssm_6item_cat))
-# r01_demo$hfssm_household_cat <- droplevels(as_factor(r01_demo$hfssm_household_cat))
-# r01_demo$hfssm_adult_cat <- droplevels(as_factor(r01_demo$hfssm_adult_cat))
-# r01_demo$hfssm_child_cat <- droplevels(as_factor(r01_demo$hfssm_child_cat))
-#
-# r01_demo$hfias_category <- droplevels(as_factor(r01_demo$hfias_category))
-#
-# r01_demo$cchip_category <- droplevels(as_factor(r01_demo$cchip_category))
-#
-# # parents/community
-# r01_demo$audit_cat <- droplevels(as_factor(r01_demo$audit_cat))
-# r01_demo$v7_audit_cat <- droplevels(as_factor(r01_demo$v7_audit_cat))
+# 1) Demographics Data ####
+## a) Load Data ####
+r01_demo <- as.data.frame(read_spss(("data/raw/demographics_data.sav")))
+names(r01_demo)[1] <- 'sub'
 
-## 2) Intake Data ####
+#remove 2 that were removed for ADHD
+r01_demo = r01_demo[r01_demo$sub != 31 & r01_demo$sub != 34, ]
+
+## b) Get Variable Labels and Re-Level ####
+
+# risk status
+r01_demo$risk_status_mom <- droplevels(as_factor(r01_demo$risk_status_mom))
+r01_demo$risk_status_both <- droplevels(as_factor(r01_demo$risk_status_both))
+r01_demo$sex <- as_factor(r01_demo$sex)
+
+# income
+r01_demo$income <- ifelse(is.na(r01_demo$income), NA, ifelse(r01_demo$income < 3, '< $51,000', ifelse(r01_demo$income < 5, "$51,000 - $100,000", '>$100,000')))
+
+# parental ed
+r01_demo$mom_ed <- ifelse(r01_demo$measured_parent == 0, ifelse(r01_demo$parent_ed == 0, 'High School/GED', ifelse(r01_demo$parent_ed < 3, 'AA/Technical Degree', ifelse(r01_demo$parent_ed == 3, 'Bachelor Degree', ifelse(r01_demo$parent_ed < 8, '> Bachelor Degree', 'Other/NA')))), ifelse(r01_demo$partner_ed == 0, 'High School/GED', ifelse(r01_demo$partner_ed < 3, 'AA/Technical Degree', ifelse(r01_demo$partner_ed == 3, 'Bachelor Degree', ifelse(r01_demo$partner_ed < 8, '> Bachelor Degree', 'Other/NA')))))
+
+r01_demo$dad_ed <- ifelse(r01_demo$measured_parent == 1, ifelse(r01_demo$parent_ed == 0, 'High School/GED', ifelse(r01_demo$parent_ed < 3, 'AA/Technical Degree', ifelse(r01_demo$parent_ed == 3, 'Bachelor Degree', ifelse(r01_demo$parent_ed < 8, '> Bachelor Degree', 'Other/NA')))), ifelse(r01_demo$partner_ed == 0, 'High School/GED', ifelse(r01_demo$partner_ed < 3, 'AA/Technical Degree', ifelse(r01_demo$partner_ed == 3, 'Bachelor Degree', ifelse(r01_demo$partner_ed < 8, '> Bachelor Degree', 'Other/NA')))))
+
+# race
+r01_demo$race <- ifelse(r01_demo$race == 0, 'White/Caucasian', ifelse(r01_demo$race == 2, 'Asian', ifelse(r01_demo$race == 3, 'Black/AA', 'Other')))
+
+# ethnicity
+r01_demo$ethnicity <- ifelse(r01_demo$ethnicity == 0, 'Not Hispanic/Lantinx', 'Hispanic/Lantinx')
+
+
+## 2) Anthro Data ####
+## a) Load Data ####
+r01_anthro <- as.data.frame(read_spss(("data/raw/anthro_data.sav")))
+names(r01_anthro)[1] <- 'sub'
+
+#remove 2 that were removed for ADHD
+r01_anthro <- r01_anthro[r01_anthro$sub != 31 & r01_anthro$sub != 34, ]
+
+## 3) Intake Data ####
 ## a) Load Data ####
 r01_intake <- as.data.frame(read_spss("data/raw/intake_data.sav"))
 
@@ -239,6 +229,16 @@ intake_long$broc_vas <- intake_broc_vas_long$value
 intake_grape_vas_long <- melt(r01_intake[c(1, 568, 614, 660, 706)], id.vars = 'sub')
 intake_long$grape_vas <- intake_grape_vas_long$value
 
+
 #continuous approach:
 intake_long$ps_prop <- ifelse(intake_long[['PortionSize']] == 'PS-1', 0, ifelse(intake_long[['PortionSize']] == 'PS-2', 0.33, ifelse(intake_long[['PortionSize']] == 'PS-3', 0.66, 0.99)))
 
+
+
+## 4) Questionairre eating behavior data ####
+## a) Load Data ####
+r01_eatbeh <- as.data.frame(read_spss(("data/raw/qs_eatbeh_bodyimage.sav")))
+names(r01_eatbeh)[1] <- 'sub'
+
+#remove 2 that were removed for ADHD
+r01_eatbeh <- r01_eatbeh[r01_eatbeh$sub != 31 & r01_eatbeh$sub != 34, ]
