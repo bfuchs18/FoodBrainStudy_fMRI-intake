@@ -6,9 +6,7 @@
 #### Setup ####
 
 # load packages
-library(haven)
-library(data.table)
-library(haven)
+#library(data.table)
 library(mice) # for imputing missing pre-mri fullness value
 
 # source data_org.R and feis_portionsize.R
