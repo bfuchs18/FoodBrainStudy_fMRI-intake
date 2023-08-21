@@ -88,6 +88,9 @@ meets_inclusion_criteria$passed_qc <- ifelse(meets_inclusion_criteria$sub %in% c
 
 #### Make index files ####
 
+# Convert sub to int and pad with zeros
+meets_inclusion_criteria$sub <- sprintf("%03d", as.integer(meets_inclusion_criteria$sub))
+
 # subset subjects for each analysis
 subset_lin_analyses <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns == 1  &
                                                 meets_inclusion_criteria$has_covar == 1 &
