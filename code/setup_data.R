@@ -235,10 +235,18 @@ intake_long$ps_prop <- ifelse(intake_long[['PortionSize']] == 'PS-1', 0, ifelse(
 
 
 
-## 4) Questionairre eating behavior data ####
+## 4) Questionnaire eating behavior data ####
 ## a) Load Data ####
 r01_eatbeh <- as.data.frame(read_spss(("data/raw/qs_eatbeh_bodyimage.sav")))
 names(r01_eatbeh)[1] <- 'sub'
 
 #remove 2 that were removed for ADHD
 r01_eatbeh <- r01_eatbeh[r01_eatbeh$sub != 31 & r01_eatbeh$sub != 34, ]
+
+## 4) V6 data ####
+## a) Load Data ####
+r01_V6 <- as.data.frame(read_spss(("data/raw/visit6_data.sav")))
+names(r01_V6)[1] <- 'sub'
+
+#remove 2 that were removed for ADHD
+r01_V6 <- r01_V6[r01_V6$sub != 31 & r01_V6$sub != 34, ]
