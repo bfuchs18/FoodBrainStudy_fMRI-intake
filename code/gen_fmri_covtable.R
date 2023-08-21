@@ -72,9 +72,6 @@ impute <- mice(impute_data, maxit = 5, m = 1,
 # Extract the imputed data
 imputed_complete <- complete(impute, 1)  # Use the first imputed dataset (can be any from 1 to m)
 
-# Extract the column names of variables that were imputed
-#imputed_var_names <- colnames(impute_data)[colSums(is.na(impute_data)) > 0]
-
 # Create a new column 'imputed_preff' in 'imputed_complete' to indicate imputation status
 imputed_complete$imputed_preff <- 0
 
@@ -97,6 +94,9 @@ fmri_covariates <- merge(fmri_covariates, fd[, c("sub", "fd_avg_allruns")], by =
 
 #### Replace NA with -999 ####
 fmri_covariates[is.na(fmri_covariates)] = -999
+
+#### Pad sub with zeros ####
+fmri_covariates$sub <- sprintf("%03d", as.integer(fmri_covariates$sub))
 
 #### Export database to BIDS for use in imaging analyses ####
 write.csv(fmri_covariates, 'BIDS/derivatives/analyses/foodcue-paper2/R/fmri_covariates.csv', row.names = FALSE)
