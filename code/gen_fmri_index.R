@@ -81,45 +81,81 @@ for (i in 1:nrow(meets_inclusion_criteria)) {
 
 }
 
-#### Add passed_qc to meets_inclusion_criteria ####
+#### Add cortical_fov to meets_inclusion_criteria ####
 
-# exclude 105 and 119 due to extreme FOV cut-off in fmri data
-meets_inclusion_criteria$passed_qc <- ifelse(meets_inclusion_criteria$sub %in% c("105", "119"), 0, 1)
+# indicates whether cortical FOV is acceptable
+
+# 105 and 119 have extreme FOV cut-off in fmri data
+meets_inclusion_criteria$cortical_fov <- ifelse(meets_inclusion_criteria$sub %in% c("105", "119"), 0, 1)
 
 #### Make index files ####
 
+# _lin_ = indicates analysis with parameters from linear FEIS models
+# _quad_ = indicates analysis with parameters from quadratic FEIS models
+# _fr_ = indicates analysis with food responsiveness
+# _sr_ = indicates analysis with satiety responsiveness
+# _app = indicates analysis with appetitive mask
+# _cer = indicates analysis with cerebellum mask
+
 # subset subjects for each analysis
-subset_lin_analyses <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns == 1  &
+subset_lin_app <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns == 1  &
                                                 meets_inclusion_criteria$has_covar == 1 &
-                                                meets_inclusion_criteria$passed_qc == 1 &
+                                                meets_inclusion_criteria$cortical_fov == 1 &
                                                 meets_inclusion_criteria$has_lin_feis == 1, ]
 
-subset_quad_analyses <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns == 1  &
+subset_quad_app <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns == 1  &
                                                   meets_inclusion_criteria$has_covar == 1 &
-                                                  meets_inclusion_criteria$passed_qc == 1 &
+                                                  meets_inclusion_criteria$cortical_fov == 1 &
                                                   meets_inclusion_criteria$has_quad_feis == 1, ]
 
-subset_fr_analyses <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns == 1  &
+subset_fr_app <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns == 1  &
                                                   meets_inclusion_criteria$has_covar == 1 &
-                                                  meets_inclusion_criteria$passed_qc == 1 &
+                                                  meets_inclusion_criteria$cortical_fov == 1 &
                                                   meets_inclusion_criteria$has_fr == 1, ]
 
-subset_sr_analyses <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns == 1  &
+subset_sr_app <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns == 1  &
                                                  meets_inclusion_criteria$has_covar == 1 &
-                                                 meets_inclusion_criteria$passed_qc == 1 &
+                                                 meets_inclusion_criteria$cortical_fov == 1 &
                                                  meets_inclusion_criteria$has_sr == 1, ]
 
 
+subset_lin_cer <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns == 1  &
+                                                             meets_inclusion_criteria$has_covar == 1 &
+                                                             meets_inclusion_criteria$has_lin_feis == 1, ]
+
+subset_quad_cer <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns == 1  &
+                                                              meets_inclusion_criteria$has_covar == 1 &
+                                                              meets_inclusion_criteria$has_quad_feis == 1, ]
+
+subset_fr_cer <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns == 1  &
+                                                            meets_inclusion_criteria$has_covar == 1 &
+                                                            meets_inclusion_criteria$has_fr == 1, ]
+
+subset_sr_cer <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns == 1  &
+                                                            meets_inclusion_criteria$has_covar == 1 &
+                                                            meets_inclusion_criteria$has_sr == 1, ]
+
+
+
 # make tab-separated lists
-index_lin_analyses <- paste(subset_lin_analyses$sub, collapse="\t")
-index_quad_analyses <- paste(subset_quad_analyses$sub, collapse="\t")
-index_fr_analyses <- paste(subset_fr_analyses$sub, collapse="\t")
-index_sr_analyses <- paste(subset_sr_analyses$sub, collapse="\t")
+index_lin_app <- paste(subset_lin_analyses_appetitive$sub, collapse="\t")
+index_quad_app <- paste(subset_quad_analyses_appetitive$sub, collapse="\t")
+index_fr_app <- paste(subset_fr_analyses_appetitive$sub, collapse="\t")
+index_sr_app <- paste(subset_sr_analyses_appetitive$sub, collapse="\t")
+index_lin_cer <- paste(subset_lin_analyses_cerebellum$sub, collapse="\t")
+index_quad_cer <- paste(subset_quad_analyses_cerebellum$sub, collapse="\t")
+index_fr_cer <- paste(subset_fr_analyses_cerebellum$sub, collapse="\t")
+index_sr_cer <- paste(subset_sr_analyses_cerebellum$sub, collapse="\t")
+
 
 # write tab-separated lists
-writeLines(index_lin_analyses, "BIDS/derivatives/analyses/foodcue-paper2/R/index_lin_analyses.txt")
-writeLines(index_quad_analyses, "BIDS/derivatives/analyses/foodcue-paper2/R/index_quad_analyses.txt")
-writeLines(index_lin_analyses, "BIDS/derivatives/analyses/foodcue-paper2/R/index_fr_analyses.txt")
-writeLines(index_fr_analyses, "BIDS/derivatives/analyses/foodcue-paper2/R/index_sr_analyses.txt")
+writeLines(index_lin_app, "BIDS/derivatives/analyses/foodcue-paper2/R/index_lin_app.txt")
+writeLines(index_quad_app, "BIDS/derivatives/analyses/foodcue-paper2/R/index_quad_app.txt")
+writeLines(index_fr_app, "BIDS/derivatives/analyses/foodcue-paper2/R/index_fr_app.txt")
+writeLines(index_sr_app, "BIDS/derivatives/analyses/foodcue-paper2/R/index_sr_app.txt")
+writeLines(index_lin_cer, "BIDS/derivatives/analyses/foodcue-paper2/R/index_lin_cer.txt")
+writeLines(index_quad_cer, "BIDS/derivatives/analyses/foodcue-paper2/R/index_quad_cer.txt")
+writeLines(index_fr_cer, "BIDS/derivatives/analyses/foodcue-paper2/R/index_fr_cer.txt")
+writeLines(index_sr_cer, "BIDS/derivatives/analyses/foodcue-paper2/R/index_sr_cer.txt")
 
 
