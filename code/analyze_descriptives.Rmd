@@ -19,6 +19,7 @@ library(dplyr)
 library(haven)
 library(reshape2)
 library(corrplot)
+library(tidyr) # to use "gather()"
 
 ```
 
@@ -109,6 +110,23 @@ beh_vars <- beh_vars[, new_column_order] # Reorder
 
 Descriptive statistics for meal variables by portion size 
 
+```{r histogram: meal intake, include=TRUE}
+
+# total grams consumed, overlap by by portion size
+ggplot(subset_intake_long, aes(x=grams, fill = as.factor(PortionSize)))+
+   geom_histogram( color='#e9ecef', alpha=1, position='identity')
+
+# total kcal consumed, overlap by portion size
+ggplot(subset_intake_long, aes(x=kcal, fill = as.factor(PortionSize)))+
+   geom_histogram( color='#e9ecef', alpha=1, position='identity')
+
+# total grams consumed, facet by portion size
+ggplot(subset_intake_long, aes(grams)) + geom_histogram() + facet_wrap(~PortionSize)
+
+# total kcal consumed, facet by portion size
+ggplot(subset_intake_long, aes(kcal)) + geom_histogram() + facet_wrap(~PortionSize)
+```
+
 ```{r table: meal intake descriptives, include=TRUE}
 
 # assign labels for table1()
@@ -123,6 +141,18 @@ table1(~ grams + kcal + avg_vas + preFF | PortionSize, data=subset_intake_long, 
 ```
 
 Descriptive statistics for linear and quadratic FEIS slopes, verticies, and CEBQ variables
+
+```{r histograms: eating behaviors, include=TRUE}
+
+hist(beh_vars$l_grams_ps_lin)
+hist(beh_vars$l_kcal_ps_lin)
+hist(beh_vars$q_grams_ps_quad)
+hist(beh_vars$q_kcal_ps_quad)
+hist(beh_vars$g_vertex) # do analyses with and without outlier?
+hist(beh_vars$kcal_vertex) # do analyses with and without outlier?
+hist(beh_vars$cebq_fr)
+hist(beh_vars$cebq_sr)
+```
 
 ```{r table: eating behavior descriptives, include=TRUE}
 
