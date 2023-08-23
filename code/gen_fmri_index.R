@@ -6,7 +6,7 @@
 #### Setup ####
 
 # source data_org.R and feis_portionsize.R
-source("code/gen_fmricovtable") # this sources setup_data.R and feis_portionsize.R
+source("code/gen_fmri_covtable.R") # this sources setup_data.R and feis_portionsize.R
 
 # import motion summary databases
 mot_sum <- read.delim("BIDS/derivatives/preprocessed/fmriprep/task-foodcue_byrun-censorsummary_fd-0.9.tsv")
@@ -20,6 +20,10 @@ censor_thresh = 20
 good_run_n <- mot_sum %>%
   group_by(sub) %>%
   summarize(n_good_runs = sum(p_censor_interest < censor_thresh))
+
+# pad sub in good_run_n with zeros
+good_run_n$sub <- sprintf("%03d", good_run_n$sub)
+
 
 #### Generate inclusion database ####
 
@@ -138,14 +142,14 @@ subset_sr_cer <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns
 
 
 # make tab-separated lists
-index_lin_app <- paste(subset_lin_analyses_appetitive$sub, collapse="\t")
-index_quad_app <- paste(subset_quad_analyses_appetitive$sub, collapse="\t")
-index_fr_app <- paste(subset_fr_analyses_appetitive$sub, collapse="\t")
-index_sr_app <- paste(subset_sr_analyses_appetitive$sub, collapse="\t")
-index_lin_cer <- paste(subset_lin_analyses_cerebellum$sub, collapse="\t")
-index_quad_cer <- paste(subset_quad_analyses_cerebellum$sub, collapse="\t")
-index_fr_cer <- paste(subset_fr_analyses_cerebellum$sub, collapse="\t")
-index_sr_cer <- paste(subset_sr_analyses_cerebellum$sub, collapse="\t")
+index_lin_app <- paste(subset_lin_app$sub, collapse="\t")
+index_quad_app <- paste(subset_quad_app$sub, collapse="\t")
+index_fr_app <- paste(subset_fr_app$sub, collapse="\t")
+index_sr_app <- paste(subset_sr_app$sub, collapse="\t")
+index_lin_cer <- paste(subset_lin_cer$sub, collapse="\t")
+index_quad_cer <- paste(subset_quad_cer$sub, collapse="\t")
+index_fr_cer <- paste(subset_fr_cer$sub, collapse="\t")
+index_sr_cer <- paste(subset_sr_cer$sub, collapse="\t")
 
 
 # write tab-separated lists
