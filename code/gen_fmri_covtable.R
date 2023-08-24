@@ -99,6 +99,6 @@ fmri_covariates[is.na(fmri_covariates)] = -999
 fmri_covariates$sub <- sprintf("%03d", as.integer(fmri_covariates$sub))
 
 #### Export database to BIDS for use in imaging analyses ####
-write.csv(fmri_covariates, 'BIDS/derivatives/analyses/foodcue-paper2/R/fmri_covariates.csv', row.names = FALSE)
+write.csv(fmri_covariates, 'BIDS/derivatives/analyses/foodcue-paper2/R/fmri_covariates.csv', row.names = FALSE, quote = FALSE)
 
 
