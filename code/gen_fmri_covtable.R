@@ -33,15 +33,15 @@ r01_V6$pre_mri_snack <- NA
 for (i in 1:nrow(r01_V6)) {
   if(!is.na(r01_V6$ff_postmri_snack2[i])){
     r01_V6$pre_mri_ff[i] <- r01_V6$ff_postmri_snack2[i]
-    r01_V6$pre_mri_snack[i] <- "yes"
+    r01_V6$pre_mri_snack[i] <- 1 # indicates had snack
   }
   else if(!is.na(r01_V6$ff_postmri_snack[i])) {
     r01_V6$pre_mri_ff[i] <- r01_V6$ff_postmri_snack[i]
-    r01_V6$pre_mri_snack[i] <- "yes"
+    r01_V6$pre_mri_snack[i] <- 1 # indicates had snack
   }
   else if(!is.na(r01_V6$ff_premri_snack[i])) {
     r01_V6$pre_mri_ff[i] <- r01_V6$ff_premri_snack[i]
-    r01_V6$pre_mri_snack[i] <- "no"
+    r01_V6$pre_mri_snack[i] <- 0 # indicates no snack
   }
 }
 
@@ -99,6 +99,5 @@ fmri_covariates[is.na(fmri_covariates)] = -999
 fmri_covariates$sub <- sprintf("%03d", as.integer(fmri_covariates$sub))
 
 #### Export database to BIDS for use in imaging analyses ####
-write.csv(fmri_covariates, 'BIDS/derivatives/analyses/foodcue-paper2/R/fmri_covariates.csv', row.names = FALSE, quote = FALSE)
-
+write.table(fmri_covariates, "BIDS/derivatives/analyses/foodcue-paper2/R/fmri_covariates.csv", sep = "\t", row.names = FALSE, quote = FALSE, fileEncoding = "ASCII")
 
