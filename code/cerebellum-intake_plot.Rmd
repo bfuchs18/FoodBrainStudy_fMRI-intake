@@ -1,53 +1,82 @@
 ---
-title: "cerebellum-intake_plot"
+title: "Cerebellum response vs. quadratic portion size effect"
 author: "baf44"
 date: "1/31/2023"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
+## Setup
+```{r load packages, include=FALSE}
+library(ggplot2)
+library(stringr)
+```
 
-```{r import and subset datasets, include=FALSE}
+To guarantee we are plotting data used in fMRI analyses, import data directly from derivatives map folder rather than regenerating fmri_covariate and index lists 
+```{r load data, include=FALSE}
 
-# import covariate files used in analyses
-betas <- read.delim("data/raw/cerebellum_betas.txt")
+# Construct the relative path to the CSV file
+map_dir <- file.path("..", "BIDS", 
+                     "derivatives", "analyses", 
+                     "foodcue-paper2", "level2", 
+                     "feis_cerebellum", "ped_fd-0.9_b20_3runs_noGSR_08-25-23")
 
-# import intake data
-feis_data <- read.csv("data/generated/intake_feis.csv")
-feis_data <- feis_data[c("sub","led_grams_ps_lin")]
+# import fmri_covariate file used in analyses
+fmri_covariates <- read.delim(file.path(map_dir, "fmri_covariates.csv"))
 
-# import anthro data
-anthro_data <- read_sav("data/raw/anthro_data.sav")
-anthro_data <- anthro_data[c("id","risk_status_mom")]
-colnames(anthro_data)[1] <- "sub"
+# import file with extracted betas
+betas <- read.delim(file.path(map_dir, "cerebellum_betas.txt"))
+
 ```
 
 
-```{r cars}
-library(stringr)
+```{r clean betas dataframe}
 
-# clean betas dataframe
+# set column names
 colnames(betas)[1] <- "sub" #set column name
-colnames(betas)[2] <- "betas" #set column name
-betas$betas_temp <- str_trim(betas$betas) # removes white space at start of string
-betas$betas_2 <- as.numeric(sub(" .*", "", betas$betas_temp)) # remove everything every " ", make numeric
+colnames(betas)[2] <- "betas_str" #set column name
 
-# add bodyfat % to EDcon_bodyfat_beta 
-combined <- merge(betas, feis_data, by="sub")
-combined <- merge(combined, anthro_data, by="sub")
+# remove white space at start of string, remove spaces, make numeric
+betas$betas <- as.numeric(sub(" .*", "", str_trim(betas$betas_str)))
+
+```
+
+```{r concat dataframes}
+
+# merge, only retain subjects included in both dataframes (default setting)
+fmri_covariates <- merge(fmri_covariates, betas, by = "sub")
+
 ```
 
 ## Plot
 
-```{r pressure, echo=FALSE}
-library(ggplot2)
+Does it make sense to do this?
+```{r plot residual values, echo=FALSE}
 
-# to color points by risk in plot, add aes(..., col = risk_status_mom)
-combined$risk_status_mom <- as.factor(combined$risk_status_mom)
+lm_predict_betas = lm(betas ~ q_grams_int + q_grams_ps_lin + q_grams_ps_quad + sex + fd_avg_allruns + pre_mri_ff + cams_pre_mri, data = fmri_covariates)
 
-ggplot(combined, aes(x=led_grams_ps_lin, y=betas_2)) + 
+# get adjusted response after adjusting for covariates in model 
+fmri_covariates$predict_betas <- predict(lm_predict_betas, type="response")
+
+
+ggplot(fmri_covariates, aes(x=q_grams_ps_quad, y=predict_betas)) + 
   geom_point()+
   geom_smooth(method=lm, formula = y ~ x, color="black") +
-  labs(title="Cerebellum portion size response vs. intake portion size response",
-       x="Linear portion size slope for Low ED foods (grams)", y = "BOLD response to Large - Small Low ED foods") + 
+  labs(title="Adjusted cerebellum response vs. quadratic PSE (g)",
+       x="Quadratic slope (grams)", y = "Adjusted BOLD response to Larger - Smaller foods") + 
+  theme(axis.text.x = element_text(size=12)) +
+  theme(axis.text.y = element_text(size=12)) +
+  theme(axis.title=element_text(size=12,face="bold"))
+
+```
+
+```{r plot raw values, echo=FALSE}
+
+ggplot(fmri_covariates, aes(x=q_grams_ps_quad, y=betas)) + 
+  geom_point()+
+  geom_smooth(method=lm, formula = y ~ x, color="black") +
+  labs(title="Cerebellum response vs. quadratic PSE (g)",
+       x="Quadratic slope (grams)", y = "BOLD response to Larger - Smaller foods") + 
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=12)) +
   theme(axis.title=element_text(size=12,face="bold"))
