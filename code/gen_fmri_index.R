@@ -153,13 +153,13 @@ index_sr_cer <- paste(subset_sr_cer$sub, collapse="\t")
 
 
 # write tab-separated lists
-writeLines(index_lin_app, "BIDS/derivatives/analyses/foodcue-paper2/R/index_lin_app.txt")
-writeLines(index_quad_app, "BIDS/derivatives/analyses/foodcue-paper2/R/index_quad_app.txt")
-writeLines(index_fr_app, "BIDS/derivatives/analyses/foodcue-paper2/R/index_fr_app.txt")
-writeLines(index_sr_app, "BIDS/derivatives/analyses/foodcue-paper2/R/index_sr_app.txt")
-writeLines(index_lin_cer, "BIDS/derivatives/analyses/foodcue-paper2/R/index_lin_cer.txt")
-writeLines(index_quad_cer, "BIDS/derivatives/analyses/foodcue-paper2/R/index_quad_cer.txt")
-writeLines(index_fr_cer, "BIDS/derivatives/analyses/foodcue-paper2/R/index_fr_cer.txt")
-writeLines(index_sr_cer, "BIDS/derivatives/analyses/foodcue-paper2/R/index_sr_cer.txt")
+writeLines(index_lin_app, "BIDS/derivatives/analyses/foodcue-paper2/R/index_lin_appetitive.txt")
+writeLines(index_quad_app, "BIDS/derivatives/analyses/foodcue-paper2/R/index_quad_appetitive.txt")
+writeLines(index_fr_app, "BIDS/derivatives/analyses/foodcue-paper2/R/index_fr_appetitive.txt")
+writeLines(index_sr_app, "BIDS/derivatives/analyses/foodcue-paper2/R/index_sr_appetitive.txt")
+writeLines(index_lin_cer, "BIDS/derivatives/analyses/foodcue-paper2/R/index_lin_cerebellum.txt")
+writeLines(index_quad_cer, "BIDS/derivatives/analyses/foodcue-paper2/R/index_quad_cerebellum.txt")
+writeLines(index_fr_cer, "BIDS/derivatives/analyses/foodcue-paper2/R/index_fr_cerebellum.txt")
+writeLines(index_sr_cer, "BIDS/derivatives/analyses/foodcue-paper2/R/index_sr_cerebellum.txt")
 
 
