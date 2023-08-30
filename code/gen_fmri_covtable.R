@@ -10,11 +10,7 @@
 library(mice) # for imputing missing pre-mri fullness value
 
 # source data_org.R and feis_portionsize.R
-source("code/feis_portionsize.R") # this sources data_org
-
-# import average framewise displacement
-fd <- read.delim("BIDS/derivatives/preprocessed/fmriprep/task-foodcue_avg-fd.tsv")
-names(fd)[names(fd) == "id"] <- "sub"
+source("code/feis_portionsize.R") # this sources setup_data.R and determine_analysis_sample.R
 
 #### Add FEIS and CEBQ variables to fmri_covariates ####
 
