@@ -24,40 +24,37 @@ library(lmerTest)
 library(dplyr)
 
 # set project directory
-source("code/setup_data.R")
+source("code/determine_analysis_sample.R") # sources setup_data.R
 
-############ impute missing meal item measurements ############
+############ subset intake_long for children included in fMRI analyses ############
 
-# ID 128 PS 4: missing Mac and cheese measurements
-  ## mac and cheese thrown away before post-measurements (see v5_child_notes in visit_notes.sav)
+intake_long$sub <- sprintf("%03d", intake_long$sub)
 
-# ID 058 PS 3: missing chicken nugget measurements
-  ## chicken nugget post weight error, so no value (see v5_child_notes in visit_notes.sav)
-
+intake_long_analyze <- intake_long[intake_long$sub %in% meets_inclusion_criteria$sub[meets_inclusion_criteria$overall_include == 1], ]
 
 ############ fixed effects individual slope models (feis) ############
 
 #### estimate linear slope only ####
 
 # predict overall intake (g) - linear term
-grams_ps_feis <- feis(grams ~ preFF + avg_vas + meal_order | ps_prop , data = intake_long, id = "sub")
+grams_ps_feis <- feis(grams ~ preFF + avg_vas + meal_order | ps_prop , data = intake_long_analyze, id = "sub")
 grams_ps_feis_data <- data.frame(row.names(slopes(grams_ps_feis)), slopes(grams_ps_feis))
 names(grams_ps_feis_data) <- c('sub', 'l_grams_int', 'l_grams_ps_lin')
 
 # predict overall intake (kcal) - linear term
-kcal_ps_feis <- feis(kcal ~ preFF + avg_vas + meal_order | ps_prop , data = intake_long, id = "sub")
+kcal_ps_feis <- feis(kcal ~ preFF + avg_vas + meal_order | ps_prop , data = intake_long_analyze, id = "sub")
 kcal_ps_feis_data <- data.frame(row.names(slopes(kcal_ps_feis)), slopes(kcal_ps_feis))
 names(kcal_ps_feis_data) <- c('sub', 'l_kcal_int', 'l_kcal_ps_lin')
 
 #### estimate linear and quadratic slopes ####
 
 # predict overall intake (g) - linear and quad term
-grams_ps_psquad_feis <- feis(grams ~ preFF + avg_vas + meal_order | ps_prop + I(ps_prop*ps_prop), data = intake_long, id = "sub")
+grams_ps_psquad_feis <- feis(grams ~ preFF + avg_vas + meal_order | ps_prop + I(ps_prop*ps_prop), data = intake_long_analyze, id = "sub")
 grams_ps_psquad_feis_data <- data.frame(row.names(slopes(grams_ps_psquad_feis)), slopes(grams_ps_psquad_feis))
 names(grams_ps_psquad_feis_data) <- c('sub', 'q_grams_int', 'q_grams_ps_lin', 'q_grams_ps_quad')
 
 # predict overall intake (kcal) - linear and quad term
-kcal_ps_psquad_feis <- feis(kcal ~ preFF + avg_vas + meal_order | ps_prop + I(ps_prop*ps_prop), data = intake_long, id = "sub")
+kcal_ps_psquad_feis <- feis(kcal ~ preFF + avg_vas + meal_order | ps_prop + I(ps_prop*ps_prop), data = intake_long_analyze, id = "sub")
 kcal_ps_psquad_feis_data <- data.frame(row.names(slopes(kcal_ps_psquad_feis)), slopes(kcal_ps_psquad_feis))
 names(kcal_ps_psquad_feis_data) <- c('sub', 'q_kcal_int', 'q_kcal_ps_lin', 'q_kcal_ps_quad')
 
@@ -80,7 +77,4 @@ kcal_ps_psquad_feis_data$kcal_vertex <- -(kcal_ps_psquad_feis_data$q_kcal_ps_lin
 intake_feis_data <- merge(grams_ps_feis_data, kcal_ps_feis_data, by = 'sub', all = TRUE)
 intake_feis_data <- merge(intake_feis_data, grams_ps_psquad_feis_data, by = 'sub', all = TRUE)
 intake_feis_data <- merge(intake_feis_data, kcal_ps_psquad_feis_data, by = 'sub', all = TRUE)
-
-# write database
-write.csv(intake_feis_data,"data/generated/intake_feis.csv", row.names = TRUE)
 
