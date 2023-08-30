@@ -6,65 +6,13 @@
 #### Setup ####
 
 # source data_org.R and feis_portionsize.R
-source("code/gen_fmri_covtable.R") # this sources setup_data.R and feis_portionsize.R
+source("code/gen_fmri_covtable.R") # this sources setup_data.R, feis_portionsize.R, and determine_analysis_sample.R
 
-# import motion summary databases
-mot_sum <- read.delim("BIDS/derivatives/preprocessed/fmriprep/task-foodcue_byrun-censorsummary_fd-0.9.tsv")
-names(mot_sum)[names(mot_sum) == "id"] <- "sub"
+#### Update inclusion database (1 = meets criteria, 0 = doesn't) ####
 
-#### Determine number of "good" fmri runs based on motion ####
-
-# define maximum percent of TRs censored for a run to be "good"
-censor_thresh = 20
-
-# determine n if censoring based on p_censor_blocks (percent of TRs censored in food and office blocks)
-good_run_n_blockcensor <- mot_sum %>%
-  group_by(sub) %>%
-  summarize(n_good_runs_b20 = sum(p_censor_blocks < censor_thresh))
-
-# determine n runs if censoring based on p_censor_food (percent of TRs censored in food blocks)
-good_run_n_foodcensor <- mot_sum %>%
-  group_by(sub) %>%
-  summarize(n_good_runs_f20 = sum(p_censor_food < censor_thresh))
-
-run_count <- merge(good_run_n_blockcensor, good_run_n_foodcensor, by = "sub")
-
-# pad sub in run_count with zeros
-run_count$sub <- sprintf("%03d", run_count$sub)
-
-
-#### Generate inclusion database ####
-
-# make dataframe with "sub" column
-meets_inclusion_criteria <- data.frame(sub = fmri_covariates$sub)
-
-# fill in meets_inclusion_criteria for each column (1 = meets criteria, 0 = doesn't)
 
 for (i in 1:nrow(meets_inclusion_criteria)) {
   sub_value <- meets_inclusion_criteria$sub[i]
-
-  # check for =>3 good runs based on n_good_runs_b20
-  if ( sub_value %in% run_count$sub ) {
-    if (run_count$n_good_runs_b20[run_count$sub == sub_value] > 2) {
-      meets_inclusion_criteria$has_3goodruns_b20[meets_inclusion_criteria$sub == sub_value] <- 1
-    } else {
-      meets_inclusion_criteria$has_3goodruns_b20[meets_inclusion_criteria$sub == sub_value] <- 0
-    }
-  } else {
-        meets_inclusion_criteria$has_3goodruns_b20[meets_inclusion_criteria$sub == sub_value] <- 0
-  }
-
-  # check for =>3 good runs based on n_good_runs_f20
-  if ( sub_value %in% run_count$sub ) {
-    if (run_count$n_good_runs_f20[run_count$sub == sub_value] > 2) {
-      meets_inclusion_criteria$has_3goodruns_f20[meets_inclusion_criteria$sub == sub_value] <- 1
-    } else {
-      meets_inclusion_criteria$has_3goodruns_f20[meets_inclusion_criteria$sub == sub_value] <- 0
-    }
-  } else {
-    meets_inclusion_criteria$has_3goodruns_f20[meets_inclusion_criteria$sub == sub_value] <- 0
-  }
-
 
   # check for linear model estimates
   if (fmri_covariates$l_grams_int[fmri_covariates$sub == sub_value] != -999) {
