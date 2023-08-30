@@ -32,6 +32,9 @@ names(r01_demo)[1] <- 'sub'
 #remove 2 that were removed for ADHD
 r01_demo = r01_demo[r01_demo$sub != 31 & r01_demo$sub != 34, ]
 
+# pad with zeros
+r01_demo$sub <- sprintf("%03d", r01_demo$sub)
+
 ## b) Get Variable Labels and Re-Level ####
 
 # risk status
@@ -62,11 +65,18 @@ names(r01_anthro)[1] <- 'sub'
 #remove 2 that were removed for ADHD
 r01_anthro <- r01_anthro[r01_anthro$sub != 31 & r01_anthro$sub != 34, ]
 
+# pad with zeros
+r01_anthro$sub <- sprintf("%03d", r01_anthro$sub)
+
 ## 3) Intake Data ####
 ## a) Load Data ####
 r01_intake <- as.data.frame(read_spss("data/raw/intake_data.sav"))
 
 names(r01_intake)[1] <- 'sub'
+
+# pad with zeros
+r01_intake$sub <- sprintf("%03d", r01_intake$sub)
+
 
 r01_intake_labels <- lapply(r01_intake, function(x) attributes(x)$label)
 
@@ -243,6 +253,9 @@ names(r01_eatbeh)[1] <- 'sub'
 #remove 2 that were removed for ADHD
 r01_eatbeh <- r01_eatbeh[r01_eatbeh$sub != 31 & r01_eatbeh$sub != 34, ]
 
+# pad with zeros
+r01_eatbeh$sub <- sprintf("%03d", r01_eatbeh$sub)
+
 ## 4) V6 data ####
 ## a) Load Data ####
 r01_V6 <- as.data.frame(read_spss(("data/raw/visit6_data.sav")))
@@ -250,3 +263,30 @@ names(r01_V6)[1] <- 'sub'
 
 #remove 2 that were removed for ADHD
 r01_V6 <- r01_V6[r01_V6$sub != 31 & r01_V6$sub != 34, ]
+
+# pad with zeros
+r01_V6$sub <- sprintf("%03d", r01_V6$sub)
+
+## 5) motion summary ####
+mot_sum <- read.delim("BIDS/derivatives/preprocessed/fmriprep/task-foodcue_byrun-censorsummary_fd-0.9.tsv")
+names(mot_sum)[names(mot_sum) == "id"] <- "sub"
+
+#remove 2 that were removed for ADHD
+mot_sum <- mot_sum[mot_sum$sub != 31 & mot_sum$sub != 34, ]
+
+# pad with zeros
+mot_sum$sub <- sprintf("%03d", mot_sum$sub)
+
+## 6) Framewise displacement ####
+
+# import average framewise displacement
+fd <- read.delim("BIDS/derivatives/preprocessed/fmriprep/task-foodcue_avg-fd.tsv")
+names(fd)[names(fd) == "id"] <- "sub"
+
+#remove 2 that were removed for ADHD
+fd <- fd[fd$sub != 31 & fd$sub != 34, ]
+
+# pad with zeros
+fd$sub <- sprintf("%03d", fd$sub)
+
+

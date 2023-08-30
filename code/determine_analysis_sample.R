@@ -27,9 +27,6 @@ good_run_n_foodcensor <- mot_sum %>%
 
 good_run_count <- merge(good_run_n_blockcensor, good_run_n_foodcensor, by = "sub")
 
-# pad sub in run_count with zeros
-good_run_count$sub <- sprintf("%03d", good_run_count$sub)
-
 #### Determine number of meals ####
 
 # Group by "sub" and summarize the counts
@@ -37,16 +34,11 @@ meal_count <- intake_long %>%
   group_by(sub) %>%
   summarize(count = sum(!is.na(grams)))
 
-# pad sub in meal_count with zeros
-meal_count$sub <- sprintf("%03d", meal_count$sub)
-
 
 #### Generate inclusion database ####
 
 # make dataframe with "sub" column
 meets_inclusion_criteria <- data.frame(sub = unique(mot_sum$sub)) # extract unique subs in mot_sum
-meets_inclusion_criteria$sub <- as.character(meets_inclusion_criteria$sub) # make string
-meets_inclusion_criteria$sub <- str_pad(meets_inclusion_criteria$sub, width = 3, pad = "0", side = "left") # pad with zeros
 
 #### Fill in inclusion database (1 = meets criteria, 0 = doesn't) ####
 
