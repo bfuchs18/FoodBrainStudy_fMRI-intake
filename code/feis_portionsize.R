@@ -28,8 +28,6 @@ source("code/determine_analysis_sample.R") # sources setup_data.R
 
 ############ subset intake_long for children included in fMRI analyses ############
 
-intake_long$sub <- sprintf("%03d", intake_long$sub)
-
 intake_long_analyze <- intake_long[intake_long$sub %in% meets_inclusion_criteria$sub[meets_inclusion_criteria$overall_include == 1], ]
 
 ############ fixed effects individual slope models (feis) ############
