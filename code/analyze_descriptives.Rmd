@@ -83,29 +83,7 @@ subset_fmri_covariates <- fmri_covariates[fmri_covariates$sub %in% fmri_subs_inc
 # Subset r01_demo based on values in fmri_subs_included
 subset_r01_demo <- r01_demo[r01_demo$sub %in% fmri_subs_included, ]
 
-subset_merged <- merge(subset_fmri_covariates, subset_r01_demo, by='sub')
-```
-
-
-```{r subset based on variables, include=TRUE}
-
-# only include variables that can be interpreted -- this excludes feis intercepts and linear slope from quadratic models (q_*_ps_lin) 
-
-# select behavioral variables for descriptive statistics and correlations
-beh_vars <- subset(subset_fmri_covariates, select=c(l_grams_ps_lin, l_kcal_ps_lin, q_grams_ps_quad, q_kcal_ps_quad, g_vertex, kcal_vertex, cebq_fr, cebq_sr))
-
-# reorder columns 
-new_column_order <- c("l_grams_ps_lin", 
-                      "l_kcal_ps_lin",
-                      "q_grams_ps_quad",
-                      "q_kcal_ps_quad",
-                      "cebq_fr",
-                      "cebq_sr",
-                      "g_vertex",
-                      "kcal_vertex") 
-
-beh_vars <- beh_vars[, new_column_order] # Reorder 
-
+#subset_merged <- merge(subset_fmri_covariates, subset_r01_demo, by='sub')
 ```
 
 
@@ -152,17 +130,15 @@ Descriptive statistics for linear and quadratic portion size slopes and CEBQ var
 ```{r table: eating behavior descriptives, include=TRUE}
 
 # assign labels for table1()
-label(beh_vars$l_grams_ps_lin) <- "linear slope, g"
-label(beh_vars$l_kcal_ps_lin) <- "linear slope, kcal"
-label(beh_vars$q_grams_ps_quad) <- "quadratic slope, g"
-label(beh_vars$q_kcal_ps_quad) <- "quadratic slope, kcal"
-label(beh_vars$g_vertex) <- "vertex, g"
-label(beh_vars$kcal_vertex) <- "vertex, kcal"
-label(beh_vars$cebq_fr) <- "food responsiveness"
-label(beh_vars$cebq_sr) <- "satiety responsiveness"
+label(subset_fmri_covariates$l_grams_ps_lin) <- "linear portion size slope, g"
+label(subset_fmri_covariates$l_kcal_ps_lin) <- "linear portion size slope, kcal"
+label(subset_fmri_covariates$q_grams_ps_quad) <- "quadratic portion size slope, g"
+label(subset_fmri_covariates$q_kcal_ps_quad) <- "quadratic portion size slope, kcal"
+label(subset_fmri_covariates$cebq_fr) <- "food responsiveness"
+label(subset_fmri_covariates$cebq_sr) <- "satiety responsiveness"
 
 # generate table
-table1(~ l_grams_ps_lin + l_kcal_ps_lin + q_grams_ps_quad + q_kcal_ps_quad + cebq_fr + cebq_sr, data=beh_vars)
+table1(~ l_grams_ps_lin + l_kcal_ps_lin + q_grams_ps_quad + q_kcal_ps_quad + cebq_fr + cebq_sr, data=subset_fmri_covariates)
 
 ```
 
@@ -170,17 +146,29 @@ Descriptive statistics for vertex by quadratic portion size slope sign (+/-)
 
 ```{r table: vertex by quadratic portion slope sign, include=TRUE}
 
-# Count the number of quadratic estimates greater than 0
-lin_g_count_above_zero <- sum(beh_vars$l_grams_ps_lin > 0, na.rm = TRUE)
-lin_kcal_count_above_zero <- sum(beh_vars$l_kcal_ps_lin > 0, na.rm = TRUE)
-quad_g_count_above_zero <- sum(beh_vars$q_grams_ps_quad > 0, na.rm = TRUE)
-quad_kcal_count_above_zero <- sum(beh_vars$q_kcal_ps_quad > 0, na.rm = TRUE)
+# Count the number of negative ( = 0) and positive ( = 1) quadratic portion size slopes
+quad_sign_table_grams <- xtabs(~ quad_sign_gram, data = subset_fmri_covariates) # grams
+quad_sign_table_kcal <- xtabs(~ quad_sign_kcal, data = subset_fmri_covariates) # kcal
 
-# Calculate the percentage above 0
-lin_g_percentage_above_zero <- (lin_g_count_above_zero / sum(!is.na(beh_vars$l_grams_ps_lin))) * 100
-lin_kcal_percentage_above_zero <- (lin_kcal_count_above_zero / sum(!is.na(beh_vars$l_kcal_ps_lin))) * 100
-quad_g_percentage_above_zero <- (quad_g_count_above_zero / sum(!is.na(beh_vars$q_grams_ps_quad))) * 100
-quad_kcal_percentage_above_zero <- (quad_kcal_count_above_zero / sum(!is.na(beh_vars$q_kcal_ps_quad))) * 100
+# Count the % of negative ( = 0) and positive ( = 1) quadratic portion size slopes
+percent_quad_sign_grams <- prop.table(quad_sign_table_grams) * 100
+percent_quad_sign_kcal <- prop.table(quad_sign_table_kcal) * 100
+
+# setup
+subset_fmri_covariates$quad_sign_gram <- factor(subset_fmri_covariates$quad_sign_gram, levels=c(0,1),
+                            labels=c("Negative Quadratic Slope", "Positive Quadratic Slope"))
+
+
+# subset subset_fmri_covariates
+subset_vertex_with_outliers <- subset_fmri_covariates[subset_fmri_covariates$sub %in% subset_quad_cer_b20$sub, ]
+subset_vertex_no_outliers_g <- subset_fmri_covariates[subset_fmri_covariates$sub %in% subset_g_vertex_app_b20$sub, ]
+subset_vertex_no_outliers_kcal <- subset_fmri_covariates[subset_fmri_covariates$sub %in% subset_kcal_vertex_app_b20$sub, ]
+
+# generate tables
+table1(~ g_vertex | quad_sign_gram , data=subset_vertex_with_outliers)
+table1(~ kcal_vertex | quad_sign_gram , data=subset_vertex_with_outliers)
+table1(~ g_vertex | quad_sign_gram , data=subset_vertex_no_outliers_g)
+table1(~ kcal_vertex | quad_sign_gram , data=subset_vertex_no_outliers_kcal)
 
 ```
 
@@ -199,12 +187,34 @@ t.test(beh_vars$q_kcal_ps_quad, mu = 0, alternative = "two.sided")
 
 Exploratory correlations between linear and quadratic FEIS slopes, vertices, and CEBQ variables
 
+<!-- ```{r subset based on variables, include=TRUE} -->
+
+<!-- # only include variables that can be interpreted -- this excludes feis intercepts and linear slope from quadratic models (q_*_ps_lin)  -->
+
+<!-- # select behavioral variables for descriptive statistics and correlations -->
+<!-- beh_vars <- subset(subset_fmri_covariates, select=c(l_grams_ps_lin, l_kcal_ps_lin, q_grams_ps_quad, q_kcal_ps_quad, g_vertex, kcal_vertex, cebq_fr, cebq_sr)) -->
+
+<!-- # reorder columns  -->
+<!-- new_column_order <- c("l_grams_ps_lin",  -->
+<!--                       "l_kcal_ps_lin", -->
+<!--                       "q_grams_ps_quad", -->
+<!--                       "q_kcal_ps_quad", -->
+<!--                       "cebq_fr", -->
+<!--                       "cebq_sr", -->
+<!--                       "g_vertex", -->
+<!--                       "kcal_vertex")  -->
+
+<!-- beh_vars <- beh_vars[, new_column_order] # Reorder  -->
+
+<!-- ``` -->
+
+
 ```{r eating behavior associations, include=TRUE}
 
 
 #### Pearson correlations ####
 # create matrix for pearson correlations - exclude vertex due to non-normal distribution
-pearson_matrix_vars <- as.matrix(beh_vars[, c("l_grams_ps_lin", "l_kcal_ps_lin","q_grams_ps_quad","q_kcal_ps_quad","cebq_fr","cebq_sr")])
+pearson_matrix_vars <- as.matrix(subset_fmri_covariates[, c("l_grams_ps_lin", "l_kcal_ps_lin","q_grams_ps_quad","q_kcal_ps_quad","cebq_fr","cebq_sr")])
 
 # run pearson correlations
 pearson_matrix<-rcorr(pearson_matrix_vars, type=c("pearson"))
