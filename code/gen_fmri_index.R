@@ -82,6 +82,17 @@ for (i in 1:nrow(meets_inclusion_criteria)) {
 # 105 and 119 have extreme FOV cut-off in fmri data
 meets_inclusion_criteria$cortical_fov <- ifelse(meets_inclusion_criteria$sub %in% c("105", "119"), 0, 1)
 
+#### Add vertex_outlier criteria to meets_inclusion_criteria ####
+
+# indicates whether vertex is an NOT an outlier (0 = not an outlier), determined using rosnerTest in analyze_descriptives.Rmd
+
+meets_inclusion_criteria$not_g_vertex_outlier <- ifelse(meets_inclusion_criteria$sub %in% c("094", "129", "043", "121", "089"), 0, 1)
+meets_inclusion_criteria$not_kcal_vertex_outlier <- ifelse(meets_inclusion_criteria$sub %in% c("109", "126", "043"), 0, 1)
+
+
+#### Add  to meets_inclusion_criteria ####
+
+
 #### Make index files ####
 
 # _lin_ = indicates analysis with parameters from linear FEIS models
@@ -114,6 +125,15 @@ subset_sr_app_b20 <- meets_inclusion_criteria[meets_inclusion_criteria$has_3good
                                                  meets_inclusion_criteria$cortical_fov == 1 &
                                                  meets_inclusion_criteria$has_sr == 1, ]
 
+subset_g_vertex_app_b20 <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns_b20 == 1  &
+                                                      meets_inclusion_criteria$has_covar == 1 &
+                                                      meets_inclusion_criteria$cortical_fov == 1 &
+                                                      meets_inclusion_criteria$not_g_vertex_outlier == 1,]
+
+subset_kcal_vertex_app_b20 <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns_b20 == 1  &
+                                                         meets_inclusion_criteria$has_covar == 1 &
+                                                         meets_inclusion_criteria$cortical_fov == 1 &
+                                                         meets_inclusion_criteria$not_kcal_vertex_outlier == 1,]
 
 subset_lin_cer_b20 <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns_b20 == 1  &
                                                              meets_inclusion_criteria$has_covar == 1 &
@@ -131,15 +151,29 @@ subset_sr_cer_b20 <- meets_inclusion_criteria[meets_inclusion_criteria$has_3good
                                                             meets_inclusion_criteria$has_covar == 1 &
                                                             meets_inclusion_criteria$has_sr == 1, ]
 
+subset_g_vertex_cer_b20 <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns_b20 == 1  &
+                                                meets_inclusion_criteria$has_covar == 1 &
+                                                meets_inclusion_criteria$not_g_vertex_outlier == 1,]
+
+subset_kcal_vertex_cer_b20 <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns_b20 == 1  &
+                                                      meets_inclusion_criteria$has_covar == 1 &
+                                                      meets_inclusion_criteria$not_kcal_vertex_outlier == 1,]
+
+
+
 # make tab-separated lists
 index_lin_app_b20 <- paste(subset_lin_app_b20$sub, collapse="\t")
 index_quad_app_b20 <- paste(subset_quad_app_b20$sub, collapse="\t")
 index_fr_app_b20 <- paste(subset_fr_app_b20$sub, collapse="\t")
 index_sr_app_b20 <- paste(subset_sr_app_b20$sub, collapse="\t")
+index_g_vertex_app_b20 <- paste(subset_g_vertex_app_b20$sub, collapse="\t")
+index_kcal_vertex_app_b20 <- paste(subset_kcal_vertex_app_b20$sub, collapse="\t")
 index_lin_cer_b20 <- paste(subset_lin_cer_b20$sub, collapse="\t")
 index_quad_cer_b20 <- paste(subset_quad_cer_b20$sub, collapse="\t")
 index_fr_cer_b20 <- paste(subset_fr_cer_b20$sub, collapse="\t")
 index_sr_cer_b20 <- paste(subset_sr_cer_b20$sub, collapse="\t")
+index_g_vertex_cer_b20 <- paste(subset_g_vertex_cer_b20$sub, collapse="\t")
+index_kcal_vertex_cer_b20 <- paste(subset_kcal_vertex_cer_b20$sub, collapse="\t")
 
 
 # write tab-separated lists
@@ -147,9 +181,13 @@ writeLines(index_lin_app_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_
 writeLines(index_quad_app_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_quad_appetitive_fd-0.9_b20_3runs.txt")
 writeLines(index_fr_app_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_fr_appetitive_fd-0.9_b20_3runs.txt")
 writeLines(index_sr_app_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_sr_appetitive_fd-0.9_b20_3runs.txt")
+writeLines(index_g_vertex_app_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_g-vert-noout_appetitive_fd-0.9_b20_3runs.txt")
+writeLines(index_kcal_vertex_app_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_kcal-vert-noout_appetitive_fd-0.9_b20_3runs.txt")
 writeLines(index_lin_cer_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_lin_cerebellum_fd-0.9_b20_3runs.txt")
 writeLines(index_quad_cer_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_quad_cerebellum_fd-0.9_b20_3runs.txt")
 writeLines(index_fr_cer_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_fr_cerebellum_fd-0.9_b20_3runs.txt")
 writeLines(index_sr_cer_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_sr_cerebellum_fd-0.9_b20_3runs.txt")
+writeLines(index_g_vertex_cer_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_g-vert-noout_cerebellum_fd-0.9_b20_3runs.txt")
+writeLines(index_kcal_vertex_cer_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_kcal-vert-noout_cerebellum_fd-0.9_b20_3runs.txt")
 
 
