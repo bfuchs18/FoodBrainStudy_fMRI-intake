@@ -84,7 +84,7 @@ meets_inclusion_criteria$cortical_fov <- ifelse(meets_inclusion_criteria$sub %in
 
 #### Add vertex_outlier criteria to meets_inclusion_criteria ####
 
-# indicates whether vertex is an NOT an outlier (0 = not an outlier), determined using rosnerTest in analyze_descriptives.Rmd
+# indicates whether vertex is an NOT an outlier (0 = is outlier), determined using rosnerTest in analyze_descriptives.Rmd
 
 meets_inclusion_criteria$not_g_vertex_outlier <- ifelse(meets_inclusion_criteria$sub %in% c("094", "129", "043", "121", "089"), 0, 1)
 meets_inclusion_criteria$not_kcal_vertex_outlier <- ifelse(meets_inclusion_criteria$sub %in% c("109", "126", "043"), 0, 1)
@@ -99,6 +99,7 @@ meets_inclusion_criteria$not_kcal_vertex_outlier <- ifelse(meets_inclusion_crite
 # _quad_ = indicates analysis with parameters from quadratic FEIS models
 # _fr_ = indicates analysis with food responsiveness
 # _sr_ = indicates analysis with satiety responsiveness
+# _vertex_ = indicates vertex analysis with outliers excluded
 # _app = indicates analysis with appetitive mask
 # _cer = indicates analysis with cerebellum mask
 # _b20 = indicates runs censored if >=20% TRs censored across task (food and office) blocks
@@ -128,11 +129,13 @@ subset_sr_app_b20 <- meets_inclusion_criteria[meets_inclusion_criteria$has_3good
 subset_g_vertex_app_b20 <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns_b20 == 1  &
                                                       meets_inclusion_criteria$has_covar == 1 &
                                                       meets_inclusion_criteria$cortical_fov == 1 &
+                                                      meets_inclusion_criteria$has_quad_feis == 1 &
                                                       meets_inclusion_criteria$not_g_vertex_outlier == 1,]
 
 subset_kcal_vertex_app_b20 <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns_b20 == 1  &
                                                          meets_inclusion_criteria$has_covar == 1 &
                                                          meets_inclusion_criteria$cortical_fov == 1 &
+                                                         meets_inclusion_criteria$has_quad_feis == 1 &
                                                          meets_inclusion_criteria$not_kcal_vertex_outlier == 1,]
 
 subset_lin_cer_b20 <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns_b20 == 1  &
@@ -153,10 +156,12 @@ subset_sr_cer_b20 <- meets_inclusion_criteria[meets_inclusion_criteria$has_3good
 
 subset_g_vertex_cer_b20 <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns_b20 == 1  &
                                                 meets_inclusion_criteria$has_covar == 1 &
+                                                meets_inclusion_criteria$has_quad_feis == 1 &
                                                 meets_inclusion_criteria$not_g_vertex_outlier == 1,]
 
 subset_kcal_vertex_cer_b20 <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns_b20 == 1  &
                                                       meets_inclusion_criteria$has_covar == 1 &
+                                                      meets_inclusion_criteria$has_quad_feis == 1 &
                                                       meets_inclusion_criteria$not_kcal_vertex_outlier == 1,]
 
 
