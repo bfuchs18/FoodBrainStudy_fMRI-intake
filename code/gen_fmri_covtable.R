@@ -16,6 +16,11 @@ source("code/feis_portionsize.R") # this sources setup_data.R and determine_anal
 
 fmri_covariates <- merge(intake_feis_data, r01_eatbeh[, c("sub", "cebq_fr", "cebq_sr")], by = "sub", all.x = TRUE)
 
+#### Add categorical variable based on quadratic portion size slope sign ####
+
+fmri_covariates$quad_sign_kcal <- ifelse(fmri_covariates$q_kcal_ps_quad < 0, 0, 1)
+fmri_covariates$quad_sign_gram <- ifelse(fmri_covariates$q_grams_ps_quad < 0, 0, 1)
+
 #### Add sex ####
 
 fmri_covariates <- merge(fmri_covariates, r01_eatbeh[, c("sub", "sex")], by = "sub", all.x = TRUE)
@@ -79,7 +84,6 @@ fmri_covariates <- merge(fmri_covariates, imputed_complete[, c("sub", "pre_mri_f
 
 # add r01_V6$pre_mri_snack to intake_feis_data
 fmri_covariates <- merge(fmri_covariates, r01_V6[, c("sub", "pre_mri_snack")], by = "sub", all.x = TRUE)
-
 
 #### Add pre-mri CAMS value ####
 
