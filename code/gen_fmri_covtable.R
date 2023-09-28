@@ -92,6 +92,16 @@ fmri_covariates <- merge(fmri_covariates, r01_V6[, c("sub", "cams_pre_mri")], by
 #### Add framewise displacement ####
 fmri_covariates <- merge(fmri_covariates, fd[, c("sub", "fd_avg_allruns")], by = "sub", all.x = TRUE)
 
+#### Add BMI percentile ####
+fmri_covariates <- merge(fmri_covariates, r01_anthro[, c("sub", "bmi_percentile")], by = "sub", all.x = TRUE)
+
+#### Add REE ####
+# 0 = male, 1 = female
+r01_anthro$ree <- ifelse(r01_anthro$sex == 0, ((r01_anthro$weight_avg*19.59) +(r01_anthro$height_avg*1.303) + 414.9), ((r01_anthro$weight_avg*16.969) +(r01_anthro$height_avg*1.618) + 371.2))
+
+fmri_covariates <- merge(fmri_covariates, r01_anthro[, c("sub", "ree")], by = "sub", all.x = TRUE)
+
+
 #### Replace NA with -999 ####
 fmri_covariates[is.na(fmri_covariates)] = -999
 
