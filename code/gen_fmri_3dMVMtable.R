@@ -26,6 +26,10 @@ mvm_dataframe <- mvm_dataframe %>%
 mvm_dataframe$quad_sign_gram <- ifelse(mvm_dataframe$quad_sign_gram == 0, "neg", ifelse(mvm_dataframe$quad_sign_gram == 1, "pos", mvm_dataframe$quad_sign_gram))
 mvm_dataframe$quad_sign_kcal <- ifelse(mvm_dataframe$quad_sign_kcal == 0, "neg", ifelse(mvm_dataframe$quad_sign_kcal == 1, "pos", mvm_dataframe$quad_sign_kcal))
 
+# add backslash to each row
+mvm_dataframe <- cbind(mvm_dataframe, `\\` = rep("\\"))
+
+
 #### Subset Subjs for analyses ####
 
 # remove subs w/out vertex estimates (g_vertex = -999) and g vertex outliers ("094", "129", "043", "121", "089")
@@ -38,13 +42,10 @@ mvm_dataframe_kcal_cerebellum <- mvm_dataframe %>% filter(kcal_vertex != -999, !
 mvm_dataframe_g_appetitive <- mvm_dataframe_g_cerebellum %>% filter(!Subj %in% c("105", "119"))
 mvm_dataframe_kcal_appetitive <- mvm_dataframe_kcal_cerebellum %>% filter(!Subj %in% c("105", "119"))
 
-#### Add \ column #### -- might not be necessary if calling table from script, rather than embedding table into script
-# mvm_dataframe_g_cerebellum <- cbind(mvm_dataframe_g_cerebellum, `\\` = rep("\\"))
-
 
 #### Export database to BIDS for use in imaging analyses ####
-write.table(mvm_dataframe_g_cerebellum, "BIDS/derivatives/analyses/foodcue-paper2/R/mvm_dataframe_g_cerebellum.csv", sep = "\t", row.names = FALSE, quote = FALSE, fileEncoding = "ASCII")
-write.table(mvm_dataframe_kcal_cerebellum, "BIDS/derivatives/analyses/foodcue-paper2/R/mvm_dataframe_kcal_cerebellum.csv", sep = "\t", row.names = FALSE, quote = FALSE, fileEncoding = "ASCII")
-write.table(mvm_dataframe_g_appetitive, "BIDS/derivatives/analyses/foodcue-paper2/R/mvm_dataframe_g_appetitive.csv", sep = "\t", row.names = FALSE, quote = FALSE, fileEncoding = "ASCII")
-write.table(mvm_dataframe_kcal_appetitive, "BIDS/derivatives/analyses/foodcue-paper2/R/mvm_dataframe_kcal_appetitive.csv", sep = "\t", row.names = FALSE, quote = FALSE, fileEncoding = "ASCII")
+write.table(mvm_dataframe_g_cerebellum, "BIDS/derivatives/analyses/foodcue-paper2/R/mvm_dataframe_g_cerebellum.txt", sep = "\t", row.names = FALSE, quote = FALSE, fileEncoding = "ASCII")
+write.table(mvm_dataframe_kcal_cerebellum, "BIDS/derivatives/analyses/foodcue-paper2/R/mvm_dataframe_kcal_cerebellum.txt", sep = "\t", row.names = FALSE, quote = FALSE, fileEncoding = "ASCII")
+write.table(mvm_dataframe_g_appetitive, "BIDS/derivatives/analyses/foodcue-paper2/R/mvm_dataframe_g_appetitive.txt", sep = "\t", row.names = FALSE, quote = FALSE, fileEncoding = "ASCII")
+write.table(mvm_dataframe_kcal_appetitive, "BIDS/derivatives/analyses/foodcue-paper2/R/mvm_dataframe_kcal_appetitive.txt", sep = "\t", row.names = FALSE, quote = FALSE, fileEncoding = "ASCII")
 
