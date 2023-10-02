@@ -20,7 +20,7 @@ colnames(mvm_dataframe)[which(names(mvm_dataframe) == "sub")] <- "Subj"
 # add InputFile column
 mvm_dataframe <- mvm_dataframe %>%
   mutate(InputFile = paste0("/storage/group/klk37/default/R01_Food_Brain_Study/BIDS/derivatives/analyses/foodcue-paper2/level1/sub-",
-                            Subj, "/ped_fd-0.9_b20_noGSR/stats.sub-", Subj, "+tlrc'[Large-Small_allED_GLT]'"))
+                            Subj, "/ped_fd-0.9_b20_noGSR/stats.sub-", Subj, "+tlrc[Large-Small_allED_GLT#0_Coef]"))
 
 # use labels for quad_sign variables
 mvm_dataframe$quad_sign_gram <- ifelse(mvm_dataframe$quad_sign_gram == 0, "neg", ifelse(mvm_dataframe$quad_sign_gram == 1, "pos", mvm_dataframe$quad_sign_gram))
