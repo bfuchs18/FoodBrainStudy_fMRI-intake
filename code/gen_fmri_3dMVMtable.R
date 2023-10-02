@@ -43,8 +43,8 @@ mvm_dataframe_kcal_appetitive <- mvm_dataframe_kcal_cerebellum %>% filter(!Subj 
 
 
 #### Export database to BIDS for use in imaging analyses ####
-write.table(mvm_dataframe_g_cerebellum, "BIDS/derivatives/analyses/foodcue-paper2/R/mvm_dataframe_g_cerebellum.csv", sep = "\t", row.names = TRUE, quote = FALSE, fileEncoding = "ASCII")
-write.table(mvm_dataframe_kcal_cerebellum, "BIDS/derivatives/analyses/foodcue-paper2/R/mvm_dataframe_kcal_cerebellum.csv", sep = "\t", row.names = TRUE, quote = FALSE, fileEncoding = "ASCII")
-write.table(mvm_dataframe_g_appetitive, "BIDS/derivatives/analyses/foodcue-paper2/R/mvm_dataframe_g_appetitive.csv", sep = "\t", row.names = TRUE, quote = FALSE, fileEncoding = "ASCII")
-write.table(mvm_dataframe_kcal_appetitive, "BIDS/derivatives/analyses/foodcue-paper2/R/mvm_dataframe_kcal_appetitive.csv", sep = "\t", row.names = TRUE, quote = FALSE, fileEncoding = "ASCII")
+write.table(mvm_dataframe_g_cerebellum, "BIDS/derivatives/analyses/foodcue-paper2/R/mvm_dataframe_g_cerebellum.csv", sep = "\t", row.names = FALSE, quote = FALSE, fileEncoding = "ASCII")
+write.table(mvm_dataframe_kcal_cerebellum, "BIDS/derivatives/analyses/foodcue-paper2/R/mvm_dataframe_kcal_cerebellum.csv", sep = "\t", row.names = FALSE, quote = FALSE, fileEncoding = "ASCII")
+write.table(mvm_dataframe_g_appetitive, "BIDS/derivatives/analyses/foodcue-paper2/R/mvm_dataframe_g_appetitive.csv", sep = "\t", row.names = FALSE, quote = FALSE, fileEncoding = "ASCII")
+write.table(mvm_dataframe_kcal_appetitive, "BIDS/derivatives/analyses/foodcue-paper2/R/mvm_dataframe_kcal_appetitive.csv", sep = "\t", row.names = FALSE, quote = FALSE, fileEncoding = "ASCII")
 
