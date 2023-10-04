@@ -286,7 +286,18 @@ names(fd)[names(fd) == "id"] <- "sub"
 #remove 2 that were removed for ADHD
 fd <- fd[fd$sub != 31 & fd$sub != 34, ]
 
-# pad with zeros
-fd$sub <- sprintf("%03d", fd$sub)
+## 7) scan status redcap form ####
 
+# scan status redcap form
+scan_status <- read.csv("data/raw/FoodAndBrainR01DataP-Scansroar.csv")
+names(scan_status)[names(scan_status) == "par_id"] <- "sub"
+
+# reduce to needed columns
+scan_status <- scan_status[,c("sub", "fmri_pp_complete", "fmri_pp_scans_roar___2","fmri_pp_scans_roar___3", "fmri_pp_scans_roar___4","fmri_pp_scans_roar___5","fmri_pp_scans_roar___6" )]
+
+#remove 2 that were removed for ADHD
+scan_status <- scan_status[scan_status$sub != 31 & scan_status$sub != 34, ]
+
+# pad with zeros
+scan_status$sub <- sprintf("%03d", scan_status$sub)
 
