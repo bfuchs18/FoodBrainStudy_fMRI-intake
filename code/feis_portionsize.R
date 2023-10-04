@@ -66,6 +66,7 @@ names(kcal_ps_psquad_feis_data) <- c('sub', 'q_kcal_int', 'q_kcal_ps_lin', 'q_kc
 # multiply the total effect by 0.33.
 # Therefore, change in linear slope for each 33% increase in amount served = (ps_prop2 x 2) x 0.33.
 # To calculate where the slope switches from positive to negative, need to find the vertex = -ps_prop/(ps_prop2 x 2)
+# (both parameters come from model that had the quadratic term)
 
 grams_ps_psquad_feis_data$g_vertex <- -(grams_ps_psquad_feis_data$q_grams_ps_lin)/(grams_ps_psquad_feis_data$q_grams_ps_quad*2)
 kcal_ps_psquad_feis_data$kcal_vertex <- -(kcal_ps_psquad_feis_data$q_kcal_ps_lin)/(kcal_ps_psquad_feis_data$q_kcal_ps_quad*2)
