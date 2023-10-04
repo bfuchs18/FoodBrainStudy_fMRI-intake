@@ -20,6 +20,7 @@
 
 library(haven)
 library(reshape2)
+library(dplyr)
 #source('functions.R')
 
 #### set up ####
@@ -285,6 +286,10 @@ names(fd)[names(fd) == "id"] <- "sub"
 
 #remove 2 that were removed for ADHD
 fd <- fd[fd$sub != 31 & fd$sub != 34, ]
+
+# pad with zeros
+fd$sub <- sprintf("%03d", fd$sub)
+
 
 ## 7) scan status redcap form ####
 
