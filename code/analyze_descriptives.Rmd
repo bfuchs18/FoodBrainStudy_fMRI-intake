@@ -65,15 +65,15 @@ nrow(subset_lin_app_b20)
 nrow(subset_quad_app_b20) # quadtratic + vertex analyses (with outliers)
 nrow(subset_fr_app_b20)
 nrow(subset_sr_app_b20)
-nrow(subset_g_vertex_app_b20) # vertex analyses without outliers
-nrow(subset_kcal_vertex_app_b20) # vertex analyses without outliers
+#nrow(subset_g_vertex_app_b20) # vertex analyses without outliers
+#nrow(subset_kcal_vertex_app_b20) # vertex analyses without outliers
 
 nrow(subset_lin_cer_b20)
 nrow(subset_quad_cer_b20) # quadtratic + vertex analyses (with outliers)
 nrow(subset_fr_cer_b20)
 nrow(subset_sr_cer_b20)
-nrow(subset_g_vertex_cer_b20) # vertex analyses without outliers
-nrow(subset_kcal_vertex_cer_b20) # vertex analyses without outliers
+#nrow(subset_g_vertex_cer_b20) # vertex analyses without outliers
+#nrow(subset_kcal_vertex_cer_b20) # vertex analyses without outliers
 ```
 
 Compared to subset_lin_app, subset_quad_app is missing subs "128", "058", "083". -- These subjects do not have FEIS estimates from quadratic models because they are missing intake measurements for 1 meal.
@@ -82,10 +82,6 @@ Compared to subset_lin_app, subset_quad_app is missing subs "128", "058", "083".
 
 ```{r subset based on sample, include=TRUE}
 
-# Subset fmri_covariates based on values in fmri_subs_included
-## this is actually redundant, because fmri_covariates only includes subjects who are to be included in fmri analyses
-subset_fmri_covariates <- fmri_covariates[fmri_covariates$sub %in% fmri_subs_included, ]
-
 # Subset r01_demo based on values in fmri_subs_included
 subset_r01_demo <- r01_demo[r01_demo$sub %in% fmri_subs_included, ]
 participants_r01_demo <- r01_demo[r01_demo$sub %in% r01_V6$sub, ]
@@ -93,13 +89,32 @@ analyzed_r01_demo <- r01_demo[r01_demo$sub %in% fmri_subs_included, ]
 
 # add analyzed column
 participants_r01_demo$analyzed <- ifelse(participants_r01_demo$sub %in% fmri_subs_included, 1, 0)
-#subset_merged <- merge(subset_fmri_covariates, subset_r01_demo, by='sub')
+
 ```
 
 
-## Demographic analyses
+## Table 1 - demographics and imaging covariates by inclusion status
 
-```{r table: demographics, include=TRUE}
+```{r imaging covariates, include=TRUE}
+
+# Add variables used as MRI covariates to participants_r01_demo
+participants_r01_demo <- merge(participants_r01_demo, fd[, c("sub", "fd_avg_allruns")], by = "sub", all.x = TRUE)
+participants_r01_demo <- merge(participants_r01_demo, impute_data[, c("sub", "pre_mri_ff")], by = "sub", all.x = TRUE) #impute data is generated in gen_fmri_covtable. It includes all subs who attended V6, and does not contain the imputed pre-mri fullness value
+participants_r01_demo <- merge(participants_r01_demo, r01_V6[, c("sub", "cams_pre_mri")], by = "sub", all.x = TRUE)
+
+
+## assess distributions
+hist(participants_r01_demo$pre_mri_ff)
+hist(participants_r01_demo$cams_pre_mri)
+hist(participants_r01_demo$fd_avg_allruns)
+ks.test(participants_r01_demo$pre_mri_ff, "pnorm", mean=mean(fmri_covariates$pre_mri_ff, na.rm = TRUE), sd=sd(fmri_covariates$pre_mri_ff, na.rm = TRUE))
+ks.test(participants_r01_demo$cams_pre_mri, "pnorm", mean=mean(fmri_covariates$cams_pre_mri, na.rm = TRUE), sd=sd(fmri_covariates$cams_pre_mri, na.rm = TRUE))
+ks.test(participants_r01_demo$fd_avg_allruns, "pnorm", mean=mean(fmri_covariates$fd_avg_allruns, na.rm = TRUE), sd=sd(fmri_covariates$fd_avg_allruns, na.rm = TRUE))
+
+```
+
+
+```{r make table, include=TRUE}
 
 # make mom_edu variable with 3 levels -- combine technical degree + high school into < Bachelor
 participants_r01_demo$mom_ed_3categories <- participants_r01_demo$mom_ed
@@ -107,9 +122,9 @@ participants_r01_demo$mom_ed_3categories[participants_r01_demo$mom_ed_3categorie
 participants_r01_demo$mom_ed_3categories[participants_r01_demo$mom_ed_3categories == "High School/GED"] <- "< Bachelor Degree"
 
 # prepare variables
-participants_r01_demo$analyzed <- factor(participants_r01_demo$analyzed, levels=c(0,1),
-         labels=c("Excluded", 
-                  "Included"))
+participants_r01_demo$analyzed <- factor(participants_r01_demo$analyzed, levels=c(1,0),
+         labels=c("Included", 
+                  "Excluded"))
 
 # reorder levels
 participants_r01_demo$mom_ed_3categories <- factor(participants_r01_demo$mom_ed_3categories, levels=c("< Bachelor Degree", "Bachelor Degree", "> Bachelor Degree"))
@@ -124,19 +139,62 @@ label(participants_r01_demo$age_yr) <- "Age, yrs"
 label(participants_r01_demo$income) <- "Family Income"
 label(participants_r01_demo$bmi_percentile) <- "BMI percentile"
 label(participants_r01_demo$mom_ed_3categories) <- "Maternal Education"
+label(participants_r01_demo$cams_pre_mri) <- "pre-MRI anxiety"
+label(participants_r01_demo$pre_mri_ff) <- "pre-MRI fullness"
+label(participants_r01_demo$fd_avg_allruns) <- "Average framewise displacement"
 
 # generate table
-table1(~ sex + age_yr + race + ethnicity + income + mom_ed_3categories+ bmi_percentile | analyzed, data=participants_r01_demo)
+table1(~ sex + age_yr + race + ethnicity + income + mom_ed_3categories+ bmi_percentile + pre_mri_ff + cams_pre_mri + fd_avg_allruns| analyzed, data=participants_r01_demo, overall = F)
+
+# get quartiles for pre-MRI anxiety and FD by group (variables are non-normally distributed)
+tapply(participants_r01_demo$cams_pre_mri, participants_r01_demo$analyzed, summary)
+tapply(participants_r01_demo$fd_avg_allruns, participants_r01_demo$analyzed, summary)
 
 ```
 
-## Behavioral analyses
 
-# Descriptive statistics
+```{r comparisons by inclusion status, include=TRUE}
 
-Descriptive statistics for meal variables by portion size 
+# sex
+chisq.test(participants_r01_demo$analyzed, participants_r01_demo$sex, correct=TRUE)
 
-```{r table: meal intake descriptives, include=TRUE}
+# age
+t.test(participants_r01_demo$age_yr ~ participants_r01_demo$analyzed, var.equal = FALSE)
+
+# race
+fisher.test(participants_r01_demo$analyzed, participants_r01_demo$race)
+
+# income
+fisher.test(participants_r01_demo$analyzed, participants_r01_demo$income)
+
+# maternal education
+chisq.test(participants_r01_demo$analyzed, participants_r01_demo$mom_ed_3categories, correct=TRUE)
+
+# BMI %tile
+t.test(participants_r01_demo$bmi_percentile ~ participants_r01_demo$analyzed, var.equal = FALSE)
+
+# pre-mri anxiety
+t.test(participants_r01_demo$cams_pre_mri ~ participants_r01_demo$analyzed, var.equal = FALSE)
+wilcox.test(cams_pre_mri ~ analyzed,
+                   data = participants_r01_demo,
+                   exact = FALSE)
+
+# FD
+t.test(participants_r01_demo$fd_avg_allruns ~ participants_r01_demo$analyzed, var.equal = FALSE)
+wilcox.test(fd_avg_allruns ~ analyzed,
+                   data = participants_r01_demo,
+                   exact = FALSE)
+
+# pre-mri fullness
+t.test(participants_r01_demo$pre_mri_ff ~ participants_r01_demo$analyzed, var.equal = FALSE)
+
+
+```
+
+
+## Meal intake variables (data for FEIS models)
+
+```{r table: descriptive stats, include=TRUE}
 # Note: intake_long_analyze was generated by feis_portionsize.R. It only contains subjects who were included in FEIS analyses 
 
 # assign labels for table1()
@@ -150,20 +208,24 @@ table1(~ grams + kcal + avg_vas + preFF | PortionSize, data=intake_long_analyze,
 
 ```
 
+## Eating behavior variables
+
 Descriptive statistics for linear and quadratic portion size slopes and CEBQ variables
 
-```{r table: eating behavior descriptives, include=TRUE}
+```{r table: slope and CEBQ descriptives, include=TRUE}
+
+# subset_fmri_covariates
 
 # assign labels for table1()
-label(subset_fmri_covariates$l_grams_ps_lin) <- "linear portion size slope, g"
-label(subset_fmri_covariates$l_kcal_ps_lin) <- "linear portion size slope, kcal"
-label(subset_fmri_covariates$q_grams_ps_quad) <- "quadratic portion size slope, g"
-label(subset_fmri_covariates$q_kcal_ps_quad) <- "quadratic portion size slope, kcal"
-label(subset_fmri_covariates$cebq_fr) <- "food responsiveness"
-label(subset_fmri_covariates$cebq_sr) <- "satiety responsiveness"
+label(fmri_covariates$l_grams_ps_lin) <- "linear portion size slope, g"
+label(fmri_covariates$l_kcal_ps_lin) <- "linear portion size slope, kcal"
+label(fmri_covariates$q_grams_ps_quad) <- "quadratic portion size slope, g"
+label(fmri_covariates$q_kcal_ps_quad) <- "quadratic portion size slope, kcal"
+label(fmri_covariates$cebq_fr) <- "food responsiveness"
+label(fmri_covariates$cebq_sr) <- "satiety responsiveness"
 
 # generate table
-table1(~ l_grams_ps_lin + l_kcal_ps_lin + q_grams_ps_quad + q_kcal_ps_quad + cebq_fr + cebq_sr, data=subset_fmri_covariates)
+table1(~ l_grams_ps_lin + l_kcal_ps_lin + q_grams_ps_quad + q_kcal_ps_quad + cebq_fr + cebq_sr, data=fmri_covariates)
 
 ```
 
@@ -171,29 +233,60 @@ Descriptive statistics for vertex by quadratic portion size slope sign (+/-)
 
 ```{r table: vertex by quadratic portion slope sign, include=TRUE}
 
+# setup
+fmri_covariates$quad_sign_gram <- factor(subset_fmri_covariates$quad_sign_gram, levels=c(0,1),
+                            labels=c("Negative Quadratic Slope", "Positive Quadratic Slope"))
+
+fmri_covariates$quad_sign_kcal <- factor(subset_fmri_covariates$quad_sign_kcal, levels=c(0,1),
+                            labels=c("Negative Quadratic Slope", "Positive Quadratic Slope"))
+
+
 # Count the number of negative ( = 0) and positive ( = 1) quadratic portion size slopes
-quad_sign_table_grams <- xtabs(~ quad_sign_gram, data = subset_fmri_covariates) # grams
-quad_sign_table_kcal <- xtabs(~ quad_sign_kcal, data = subset_fmri_covariates) # kcal
+quad_sign_table_grams <- xtabs(~ quad_sign_gram, data = fmri_covariates) # grams
+quad_sign_table_kcal <- xtabs(~ quad_sign_kcal, data = fmri_covariates) # kcal
+
+quad_sign_table_grams
+quad_sign_table_kcal
 
 # Count the % of negative ( = 0) and positive ( = 1) quadratic portion size slopes
 percent_quad_sign_grams <- prop.table(quad_sign_table_grams) * 100
 percent_quad_sign_kcal <- prop.table(quad_sign_table_kcal) * 100
 
-# setup
-subset_fmri_covariates$quad_sign_gram <- factor(subset_fmri_covariates$quad_sign_gram, levels=c(0,1),
-                            labels=c("Negative Quadratic Slope", "Positive Quadratic Slope"))
+percent_quad_sign_grams
+percent_quad_sign_kcal
+
+# subset to include subjects included in quadratic analyses
+subset_quad_analyses <- fmri_covariates[subset_fmri_covariates$sub %in% subset_quad_cer_b20$sub, ]
+
+# remove subs w/out vertex estimates (g_vertex = -999) and g vertex outliers ("094", "129", "043", "121", "089")
+subset_vertex_no_outliers_g <- fmri_covariates %>% filter(!is.na(kcal_vertex), !sub %in% c("094", "129", "043", "121", "089"))
+
+# remove subs w/out quad estimates (kcal_vertex = -999) and kcal vertex outliers ("109", "126", "043")
+subset_vertex_no_outliers_kcal <- fmri_covariates %>% filter(!is.na(kcal_vertex), !sub %in% c("109", "126", "043"))
 
 
-# subset subset_fmri_covariates
-subset_vertex_with_outliers <- subset_fmri_covariates[subset_fmri_covariates$sub %in% subset_quad_cer_b20$sub, ]
-subset_vertex_no_outliers_g <- subset_fmri_covariates[subset_fmri_covariates$sub %in% subset_g_vertex_app_b20$sub, ]
-subset_vertex_no_outliers_kcal <- subset_fmri_covariates[subset_fmri_covariates$sub %in% subset_kcal_vertex_app_b20$sub, ]
+# define function for render
+render.NEW <- function(x, name, data2, ...) {
+    MIN <- min(x, na.rm = T)
+    MAX <- max(x, na.rm = T)
+    median <- median(x, na.rm = T)
+    Q1 <- quantile(x, 0.25, na.rm = T)
+    Q3 <- quantile(x, 0.75, na.rm = T)
+    N = length(x) - sum(is.na(x))
+    
+    out <- c("","N" = N,
+             "min, max" = paste0(sprintf("%.2f", MIN), ", ", sprintf("%.2f", MAX)),
+             "Median [Q1, Q3]" = paste0(sprintf("%.2f", median), " [", sprintf("%.2f", Q1), ", ", sprintf("%.2f", Q3), "]"))
+    out
+}
 
-# generate tables
-table1(~ g_vertex | quad_sign_gram , data=subset_vertex_with_outliers)
-table1(~ kcal_vertex | quad_sign_gram , data=subset_vertex_with_outliers)
-table1(~ g_vertex | quad_sign_gram , data=subset_vertex_no_outliers_g)
-table1(~ kcal_vertex | quad_sign_gram , data=subset_vertex_no_outliers_kcal)
+# generate tables -- all subs with vertices
+table1(~ g_vertex | quad_sign_gram , data=subset_quad_analyses, render = render.NEW)
+table1(~ kcal_vertex | quad_sign_kcal , data=subset_quad_analyses, render = render.NEW)
+
+# generate tables -- outliers removed
+table1(~ g_vertex | quad_sign_gram , data=subset_vertex_no_outliers_g, render = render.NEW)
+table1(~ kcal_vertex | quad_sign_kcal , data=subset_vertex_no_outliers_kcal, render = render.NEW)
 
 ```
 
