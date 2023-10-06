@@ -231,7 +231,7 @@ table1(~ l_grams_ps_lin + l_kcal_ps_lin + q_grams_ps_quad + q_kcal_ps_quad + ceb
 
 Descriptive statistics for vertex by quadratic portion size slope sign (+/-)
 
-```{r table: vertex by quadratic portion slope sign, include=TRUE}
+```{r table: vertex by quad sign, include=TRUE}
 
 # setup
 fmri_covariates$quad_sign_gram <- factor(subset_fmri_covariates$quad_sign_gram, levels=c(0,1),
@@ -258,12 +258,7 @@ percent_quad_sign_kcal
 # subset to include subjects included in quadratic analyses
 subset_quad_analyses <- fmri_covariates[subset_fmri_covariates$sub %in% subset_quad_cer_b20$sub, ]
 
-# remove subs w/out vertex estimates (g_vertex = -999) and g vertex outliers ("094", "129", "043", "121", "089")
-subset_vertex_no_outliers_g <- fmri_covariates %>% filter(!is.na(kcal_vertex), !sub %in% c("094", "129", "043", "121", "089"))
-
-# remove subs w/out quad estimates (kcal_vertex = -999) and kcal vertex outliers ("109", "126", "043")
-subset_vertex_no_outliers_kcal <- fmri_covariates %>% filter(!is.na(kcal_vertex), !sub %in% c("109", "126", "043"))
-
+#### Table with outliers - use quartiles ####
 
 # define function for render
 render.NEW <- function(x, name, data2, ...) {
@@ -284,9 +279,16 @@ render.NEW <- function(x, name, data2, ...) {
 table1(~ g_vertex | quad_sign_gram , data=subset_quad_analyses, render = render.NEW)
 table1(~ kcal_vertex | quad_sign_kcal , data=subset_quad_analyses, render = render.NEW)
 
-# generate tables -- outliers removed
-table1(~ g_vertex | quad_sign_gram , data=subset_vertex_no_outliers_g, render = render.NEW)
-table1(~ kcal_vertex | quad_sign_kcal , data=subset_vertex_no_outliers_kcal, render = render.NEW)
+#### Table without outliers - use means ####
+
+# remove subs w/out vertex estimates (g_vertex = -999) and g vertex outliers ("094", "129", "043", "121", "089")
+subset_vertex_no_outliers_g <- fmri_covariates %>% filter(!is.na(kcal_vertex), !sub %in% c("094", "129", "043", "121", "089"))
+
+# remove subs w/out quad estimates (kcal_vertex = -999) and kcal vertex outliers ("109", "126", "043")
+subset_vertex_no_outliers_kcal <- fmri_covariates %>% filter(!is.na(kcal_vertex), !sub %in% c("109", "126", "043"))
+
+table1(~ g_vertex | quad_sign_gram , data=subset_vertex_no_outliers_g, )
+table1(~ kcal_vertex | quad_sign_kcal , data=subset_vertex_no_outliers_kcal)
 
 ```
 
@@ -325,7 +327,6 @@ Exploratory correlations between linear and quadratic FEIS slopes, vertices, and
 <!-- beh_vars <- beh_vars[, new_column_order] # Reorder  -->
 
 <!-- ``` -->
-
 
 ```{r eating behavior associations, include=TRUE}
 
@@ -394,3 +395,9 @@ round(p_UNADJ, 4)
 
 ```
 
+```{r vertex by quad sign, include=TRUE}
+
+t.test(subset_vertex_no_outliers_g$g_vertex ~ subset_vertex_no_outliers_g$quad_sign_gram, var.equal = FALSE)
+t.test(subset_vertex_no_outliers_kcal$kcal_vertex ~ subset_vertex_no_outliers_kcal$quad_sign_kcal, var.equal = FALSE)
+
+```
