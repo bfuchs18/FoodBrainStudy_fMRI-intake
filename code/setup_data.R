@@ -167,7 +167,7 @@ intake_preFF_long <- melt(r01_intake[c(1, 563, 609, 655, 701)], id.vars = 'sub')
 intake_long$preFF <- as.numeric(intake_preFF_long$value)
 
 intake_postFF_long <- melt(r01_intake[c(1, 564, 610, 656, 702)], id.vars = 'sub')
-intake_long$postFF <- as.numeric(intake_preFF_long$value)
+intake_long$postFF <- as.numeric(intake_postFF_long$value)
 
 intake_date_long <- melt(r01_intake[c(1, 562, 608, 654, 700)], id.vars = 'sub')
 intake_long$date <- intake_date_long$value
