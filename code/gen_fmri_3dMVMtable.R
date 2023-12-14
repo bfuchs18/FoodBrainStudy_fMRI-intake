@@ -42,6 +42,7 @@ mvm_dataframe_kcal_cerebellum <- mvm_dataframe %>% filter(kcal_vertex != -999, !
 mvm_dataframe_g_appetitive <- mvm_dataframe_g_cerebellum %>% filter(!Subj %in% c("105", "119"))
 mvm_dataframe_kcal_appetitive <- mvm_dataframe_kcal_cerebellum %>% filter(!Subj %in% c("105", "119"))
 
+#### Within (quad_sign) group centering of covariates ####
 
 #### Export database to BIDS for use in imaging analyses ####
 write.table(mvm_dataframe_g_cerebellum, "BIDS/derivatives/analyses/foodcue-paper2/R/mvm_dataframe_g_cerebellum.txt", sep = "\t", row.names = FALSE, quote = FALSE, fileEncoding = "ASCII")
