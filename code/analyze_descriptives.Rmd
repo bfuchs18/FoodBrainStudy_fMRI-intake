@@ -1,5 +1,5 @@
 ---
-title: "descriptive and exploratory analyses"
+title: "descriptive statistics"
 author: "baf44"
 date: "2023-08-02"
 output: html_document
