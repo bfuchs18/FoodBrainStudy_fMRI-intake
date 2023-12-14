@@ -66,7 +66,6 @@ nrow(subset_quad_app_b20) # analyses w/ quadtratic slopes, appetitive network ma
 nrow(subset_lin_cer_b20) # analyses w/ linear slopes, cerebellum mask
 nrow(subset_quad_cer_b20) # analyses w/ quadtratic slopes, cerebellum mask
 
-
 ```
 
 Compared to subset_lin_app, subset_quad_app is missing subs "128", "058", "083". -- These subjects do not have FEIS estimates from quadratic models because they are missing intake measurements for 1 meal.
@@ -79,7 +78,7 @@ Compared to subset_lin_app, subset_quad_app is missing subs "128", "058", "083".
 subset_r01_demo <- r01_demo[r01_demo$sub %in% fmri_subs_included, ]
 participants_r01_demo <- r01_demo[r01_demo$sub %in% r01_V6$sub, ]
 
-# add analyzed column- 1: sub included in analyses, 0: sub not included
+# add analyzed column: 1=sub included in analyses, 0=sub not included
 participants_r01_demo$analyzed <- ifelse(participants_r01_demo$sub %in% fmri_subs_included, 1, 0)
 
 # Add variables used as MRI covariates to participants_r01_demo
@@ -90,19 +89,35 @@ participants_r01_demo <- merge(participants_r01_demo, r01_V6[, c("sub", "cams_pr
 ```
 
 
-## Manuscript Table 2 - Participant characteristics
+## Assess normality
 
-```{r assess distributions of imaging covariates, include=TRUE}
+```{r assess normality of slopes and imaging covariates, include=TRUE}
 
-## assess distributions
+# Histograms of imaging covariates
 hist(participants_r01_demo$pre_mri_ff)
 hist(participants_r01_demo$cams_pre_mri)
 hist(participants_r01_demo$fd_avg_allruns)
+
+# Histograms of portion size slopes
+hist(fmri_covariates$l_kcal_ps_lin)
+hist(fmri_covariates$l_grams_ps_lin)
+hist(fmri_covariates$q_kcal_ps_lin)
+hist(fmri_covariates$q_grams_ps_lin)
+
+# Kolmogorov-Smirnov tests for imaging covariates
 ks.test(participants_r01_demo$pre_mri_ff, "pnorm", mean=mean(fmri_covariates$pre_mri_ff, na.rm = TRUE), sd=sd(fmri_covariates$pre_mri_ff, na.rm = TRUE))
 ks.test(participants_r01_demo$cams_pre_mri, "pnorm", mean=mean(fmri_covariates$cams_pre_mri, na.rm = TRUE), sd=sd(fmri_covariates$cams_pre_mri, na.rm = TRUE))
 ks.test(participants_r01_demo$fd_avg_allruns, "pnorm", mean=mean(fmri_covariates$fd_avg_allruns, na.rm = TRUE), sd=sd(fmri_covariates$fd_avg_allruns, na.rm = TRUE))
 
+# Kolmogorov-Smirnov tests for portion size slopes
+ks.test(fmri_covariates$l_kcal_ps_lin, "pnorm", mean=mean(fmri_covariates$l_kcal_ps_lin, na.rm = TRUE), sd=sd(fmri_covariates$l_kcal_ps_lin, na.rm = TRUE))
+ks.test(fmri_covariates$l_grams_ps_lin, "pnorm", mean=mean(fmri_covariates$l_grams_ps_lin, na.rm = TRUE), sd=sd(fmri_covariates$l_grams_ps_lin, na.rm = TRUE))
+ks.test(fmri_covariates$q_kcal_ps_lin, "pnorm", mean=mean(fmri_covariates$q_kcal_ps_lin, na.rm = TRUE), sd=sd(fmri_covariates$q_kcal_ps_lin, na.rm = TRUE))
+ks.test(fmri_covariates$q_grams_ps_lin, "pnorm", mean=mean(fmri_covariates$q_grams_ps_lin, na.rm = TRUE), sd=sd(fmri_covariates$q_grams_ps_lin, na.rm = TRUE))
+
 ```
+
+## Manuscript Table 2 - Participant characteristics
 
 Participant table includes descriptive statistics for demographic and imaging covariates, by inclusion status
 ```{r make participant table, include=TRUE}
@@ -124,8 +139,6 @@ participants_r01_demo$income <- factor(participants_r01_demo$income, levels=c("<
 
 # assign labels for table1()
 label(participants_r01_demo$sex) <- "Sex"
-label(participants_r01_demo$race) <- "Race"
-label(participants_r01_demo$ethnicity) <- "Ethnicity"
 label(participants_r01_demo$age_yr) <- "Age, yrs"
 label(participants_r01_demo$income) <- "Family Income"
 label(participants_r01_demo$bmi_percentile) <- "BMI percentile"
@@ -135,7 +148,7 @@ label(participants_r01_demo$pre_mri_ff) <- "pre-MRI fullness"
 label(participants_r01_demo$fd_avg_allruns) <- "Average framewise displacement"
 
 # generate table
-table1(~ sex + age_yr + race + ethnicity + income + mom_ed_3categories+ bmi_percentile + pre_mri_ff + cams_pre_mri + fd_avg_allruns| analyzed, data=participants_r01_demo, overall = F)
+table1(~ sex + age_yr + income + mom_ed_3categories+ bmi_percentile + pre_mri_ff + cams_pre_mri + fd_avg_allruns| analyzed, data=participants_r01_demo, overall = F)
 
 # get quartiles for pre-MRI anxiety and FD by group (variables are non-normally distributed)
 tapply(participants_r01_demo$cams_pre_mri, participants_r01_demo$analyzed, summary)
@@ -143,6 +156,13 @@ tapply(participants_r01_demo$fd_avg_allruns, participants_r01_demo$analyzed, sum
 
 ```
 
+Uncomment to assess frequency of race/ethnicity. Race and ethnicity data will not be shared for privacy reasons due to small Ns in some race categories
+```{r assess frequency race/ethnicity, include=TRUE}
+
+# table(participants_r01_demo$race, participants_r01_demo$analyzed)
+# table(participants_r01_demo$ethnicity, participants_r01_demo$analyzed)
+
+```
 
 ```{r comparisons by inclusion status, include=TRUE}
 
@@ -152,8 +172,8 @@ chisq.test(participants_r01_demo$analyzed, participants_r01_demo$sex, correct=TR
 # age
 t.test(participants_r01_demo$age_yr ~ participants_r01_demo$analyzed, var.equal = FALSE)
 
-# race
-fisher.test(participants_r01_demo$analyzed, participants_r01_demo$race)
+# race -- race data will not be shared
+# fisher.test(participants_r01_demo$analyzed, participants_r01_demo$race)
 
 # income
 fisher.test(participants_r01_demo$analyzed, participants_r01_demo$income)
@@ -166,15 +186,9 @@ t.test(participants_r01_demo$bmi_percentile ~ participants_r01_demo$analyzed, va
 
 # pre-mri anxiety
 t.test(participants_r01_demo$cams_pre_mri ~ participants_r01_demo$analyzed, var.equal = FALSE)
-wilcox.test(cams_pre_mri ~ analyzed,
-                   data = participants_r01_demo,
-                   exact = FALSE)
 
 # FD
 t.test(participants_r01_demo$fd_avg_allruns ~ participants_r01_demo$analyzed, var.equal = FALSE)
-wilcox.test(fd_avg_allruns ~ analyzed,
-                   data = participants_r01_demo,
-                   exact = FALSE)
 
 # pre-mri fullness
 t.test(participants_r01_demo$pre_mri_ff ~ participants_r01_demo$analyzed, var.equal = FALSE)
@@ -202,7 +216,7 @@ table1(~ l_grams_ps_lin + l_kcal_ps_lin + q_grams_ps_quad + q_kcal_ps_quad, data
 
 ```
 
-```{r assess variability in linear slope, include=TRUE}
+```{r count positive linear slopes, include=TRUE}
 
 count_positive_lin_g <- sum(fmri_covariates$l_grams_ps_lin > 0)
 count_positive_lin_kcal <- sum(fmri_covariates$l_kcal_ps_lin > 0)
@@ -214,15 +228,16 @@ percent_positive_lin_g # percent of children with positive linear slope (grams)
 percent_positive_lin_kcal # percent of children with positive linear slope (kcal)
 ```
 
-```{r characterization of quadratic slopes, include=TRUE}
+```{r count positive quadratic slopes, include=TRUE}
 
-subset_quad_analyses$q_grams_lin_sign <- ifelse(subset_quad_analyses$q_grams_ps_lin >0, "pos lin q slope", ifelse(subset_quad_analyses$q_grams_ps_lin < 0, "neg lin q slope", ""))
+count_positive_quad_g <- sum(!is.na(fmri_covariates$q_grams_ps_quad) & fmri_covariates$q_grams_ps_quad > 0, na.rm = TRUE)
+count_positive_quad_kcal <- sum(!is.na(fmri_covariates$q_kcal_ps_quad) & fmri_covariates$q_kcal_ps_quad > 0, na.rm = TRUE)
 
-subset_quad_analyses$q_kcal_lin_sign <- ifelse(subset_quad_analyses$q_kcal_ps_lin >0, "pos lin q slope", ifelse(subset_quad_analyses$q_kcal_ps_lin < 0, "neg lin q slope", ""))
+percent_positive_quad_g <- (count_positive_quad_g / sum(!is.na(fmri_covariates$q_grams_ps_quad))) * 100
+percent_positive_quad_kcal <- (count_positive_quad_kcal / sum(!is.na(fmri_covariates$q_kcal_ps_quad))) * 100
 
-
-table1(~ q_grams_lin_sign | quad_sign_gram , data=subset_quad_analyses)
-table1(~ q_kcal_lin_sign | quad_sign_kcal , data=subset_quad_analyses)
+percent_positive_quad_g # percent of children with positive quadratic slope estimated from weight consumed (grams)
+percent_positive_quad_kcal # percent of children with positive quadratic slope estimated from energy consumed (kcal)
 
 ```
 
@@ -239,15 +254,6 @@ pearson_matrix_vars <- as.matrix(fmri_covariates[, c("l_grams_ps_lin", "l_kcal_p
 pearson_matrix<-rcorr(pearson_matrix_vars, type=c("pearson"))
 pearson_r_cormat <- pearson_matrix$r # Matrix of correlation coeficients
 pearson_p_cormat <- pearson_matrix$P # Matrix of unadjusted p-values
-
-#### Combine Pearson and Spearman ####
-
-# # Create combined matrix
-# combined_r_cormat <- spearman_r_cormat # make copy of spearman_r_cormat to add to
-# combined_p_cormat <- spearman_p_cormat # make copy of combined_p_cormat to add to
-# combined_r_cormat[1:6, 1:6] <- pearson_r_cormat # Replace the upper-left corner of combined_corr matrix with the Pearson correlations
-# combined_p_cormat[1:6, 1:6] <- pearson_p_cormat # Replace the upper-left corner of combined_corr matrix with the Pearson correlations
-
 
 # adjust p-values of combined matrix with p.adjust
 pearson_p_cormat[upper.tri(pearson_p_cormat)] <- NA # Isolate half of matrix
