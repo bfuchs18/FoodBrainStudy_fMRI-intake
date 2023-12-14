@@ -77,14 +77,14 @@ colnames(LargevSmall_betas_clean) <- sapply(colnames(LargevSmall_betas_clean), f
 colnames(hED_LargevSmall_betas) <- sapply(colnames(hED_LargevSmall_betas), function(x) ifelse(x %in% names(name_mapping), name_mapping[x], x))
 colnames(lED_LargevSmall_betas) <- sapply(colnames(lED_LargevSmall_betas), function(x) ifelse(x %in% names(name_mapping), name_mapping[x], x))
 
-```
-
-```{r concat intake and brain data, include=FALSE}
-
 # pad sub with zeros
 LargevSmall_betas_clean$sub <- sprintf("%03d", LargevSmall_betas_clean$sub)
 hED_LargevSmall_betas$sub <- sprintf("%03d", hED_LargevSmall_betas$sub)
 lED_LargevSmall_betas$sub <- sprintf("%03d", lED_LargevSmall_betas$sub)
+
+```
+
+```{r make long database with intake and brain data, include=FALSE}
 
 # left join -- only retain subjects who have brain data
 intake_long_LargevSmall <- left_join(LargevSmall_betas_clean, intake_long, by="sub", multiple = "all")
@@ -103,6 +103,131 @@ hED_intake_long_LargevSmall <- hED_intake_long_LargevSmall %>% mutate_at(vars(1:
 lED_intake_long_LargevSmall <- lED_intake_long_LargevSmall %>% mutate_at(vars(1:16), as.numeric)
 ```
 
+```{r make database with FEIS and brain data, include=FALSE}
+
+feis_LargevSmall <- left_join(LargevSmall_betas_clean, fmri_covariates, by="sub", multiple = "all")
+
+
+# convert roi columns (1:16) to numeric
+feis_LargevSmall <- feis_LargevSmall %>% mutate_at(vars(1:16), as.numeric)
+```
+
+#### feis analyses #### 
+
+```{r , include=TRUE}
+
+# correlations with lin feis
+cor.test(x = feis_LargevSmall$r_amygdala, y = feis_LargevSmall$l_grams_ps_lin)
+cor.test(x = feis_LargevSmall$l_amygdala, y = feis_LargevSmall$l_grams_ps_lin)
+cor.test(x = feis_LargevSmall$r_striatum, y = feis_LargevSmall$l_grams_ps_lin) 
+cor.test(x = feis_LargevSmall$l_striatum, y = feis_LargevSmall$l_grams_ps_lin) #sig
+cor.test(x = feis_LargevSmall$r_ofc2, y = feis_LargevSmall$l_grams_ps_lin)
+cor.test(x = feis_LargevSmall$l_ofc2, y = feis_LargevSmall$l_grams_ps_lin)
+cor.test(x = feis_LargevSmall$l_vmpfc1, y = feis_LargevSmall$l_grams_ps_lin)
+cor.test(x = feis_LargevSmall$r_vmpfc1, y = feis_LargevSmall$l_grams_ps_lin)
+cor.test(x = feis_LargevSmall$l_vmpfc2, y = feis_LargevSmall$l_grams_ps_lin)
+cor.test(x = feis_LargevSmall$r_vmpfc2, y = feis_LargevSmall$l_grams_ps_lin)
+cor.test(x = feis_LargevSmall$r_ifg, y = feis_LargevSmall$l_grams_ps_lin)
+cor.test(x = feis_LargevSmall$l_ifg, y = feis_LargevSmall$l_grams_ps_lin)
+cor.test(x = feis_LargevSmall$r_dlpfc, y = feis_LargevSmall$l_grams_ps_lin)
+cor.test(x = feis_LargevSmall$l_dlpfc, y = feis_LargevSmall$l_grams_ps_lin)
+cor.test(x = feis_LargevSmall$r_caudate, y = feis_LargevSmall$l_grams_ps_lin) #sig
+cor.test(x = feis_LargevSmall$l_caudate, y = feis_LargevSmall$l_grams_ps_lin)
+
+
+# correlations with quad feis
+cor.test(x = feis_LargevSmall$r_amygdala, y = feis_LargevSmall$q_grams_ps_quad)
+cor.test(x = feis_LargevSmall$l_amygdala, y = feis_LargevSmall$q_grams_ps_quad)
+cor.test(x = feis_LargevSmall$r_striatum, y = feis_LargevSmall$q_grams_ps_quad) # sig
+cor.test(x = feis_LargevSmall$l_striatum, y = feis_LargevSmall$q_grams_ps_quad)
+cor.test(x = feis_LargevSmall$r_ofc2, y = feis_LargevSmall$q_grams_ps_quad) #sig
+cor.test(x = feis_LargevSmall$l_ofc2, y = feis_LargevSmall$q_grams_ps_quad) # sig
+cor.test(x = feis_LargevSmall$l_vmpfc1, y = feis_LargevSmall$q_grams_ps_quad)
+cor.test(x = feis_LargevSmall$r_vmpfc1, y = feis_LargevSmall$q_grams_ps_quad)
+cor.test(x = feis_LargevSmall$l_vmpfc2, y = feis_LargevSmall$q_grams_ps_quad)
+cor.test(x = feis_LargevSmall$r_vmpfc2, y = feis_LargevSmall$q_grams_ps_quad) #sig
+cor.test(x = feis_LargevSmall$r_ifg, y = feis_LargevSmall$q_grams_ps_quad)
+cor.test(x = feis_LargevSmall$l_ifg, y = feis_LargevSmall$q_grams_ps_quad)
+cor.test(x = feis_LargevSmall$r_dlpfc, y = feis_LargevSmall$q_grams_ps_quad)
+cor.test(x = feis_LargevSmall$l_dlpfc, y = feis_LargevSmall$q_grams_ps_quad)
+cor.test(x = feis_LargevSmall$r_caudate, y = feis_LargevSmall$q_grams_ps_quad)
+cor.test(x = feis_LargevSmall$l_caudate, y = feis_LargevSmall$q_grams_ps_quad)
+
+
+# feis quadratic models: regressions with imaging covariates
+feis.r_amygdala<- lm(r_amygdala ~ q_grams_ps_quad + q_grams_int + q_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+feis.l_amygdala <- lm(l_amygdala ~ q_grams_ps_quad + q_grams_int + q_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+feis.r_striatum<- lm(r_striatum ~ q_grams_ps_quad + q_grams_int + q_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+feis.l_striatum <- lm(l_striatum ~ q_grams_ps_quad + q_grams_int + q_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+feis.r_ofc2<- lm(r_ofc2 ~ q_grams_ps_quad + q_grams_int + q_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+feis.l_ofc2 <- lm(l_ofc2 ~ q_grams_ps_quad + q_grams_int + q_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+feis.r_vmpfc1<- lm(r_vmpfc1 ~ q_grams_ps_quad + q_grams_int + q_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+feis.l_vmpfc1 <- lm(l_vmpfc1 ~ q_grams_ps_quad + q_grams_int + q_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+feis.r_vmpfc2<- lm(r_vmpfc2 ~ q_grams_ps_quad + q_grams_int + q_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+feis.l_vmpfc2 <- lm(l_vmpfc2 ~ q_grams_ps_quad + q_grams_int + q_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+feis.r_ifg <- lm(r_ifg ~ q_grams_ps_quad + q_grams_int + q_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+feis.l_ifg<- lm(l_ifg ~ q_grams_ps_quad + q_grams_int + q_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+feis.r_dlpfc <- lm(r_dlpfc ~ q_grams_ps_quad + q_grams_int + q_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+feis.l_dlpfc<- lm(l_dlpfc ~ q_grams_ps_quad + q_grams_int + q_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+feis.r_caudate <- lm(r_caudate ~ q_grams_ps_quad + q_grams_int + q_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+feis.l_caudate<- lm(l_caudate ~ q_grams_ps_quad + q_grams_int + q_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+
+
+summary(feis.r_amygdala) #quad
+summary(feis.l_amygdala) # trend quad
+summary(feis.r_striatum) #quad, lin
+summary(feis.l_striatum) #quad, trend lin
+summary(feis.r_ofc2) #quad
+summary(feis.l_ofc2)
+summary(feis.r_vmpfc1) #lin
+summary(feis.l_vmpfc1)
+summary(feis.r_vmpfc2)
+summary(feis.l_vmpfc2)
+summary(feis.r_ifg)
+summary(feis.l_ifg)
+summary(feis.r_dlpfc)
+summary(feis.l_dlpfc)
+summary(feis.r_caudate) #quad
+summary(feis.l_caudate) #quad
+
+
+# feis lin models: regressions with imaging covariates
+lin_feis.r_amygdala<- lm(r_amygdala ~ l_grams_int + l_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+lin_feis.l_amygdala <- lm(l_amygdala ~ l_grams_int + l_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+lin_feis.r_striatum<- lm(r_striatum ~ l_grams_int + l_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+lin_feis.l_striatum <- lm(l_striatum ~ l_grams_int + l_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+lin_feis.r_ofc2<- lm(r_ofc2 ~ l_grams_int + l_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+lin_feis.l_ofc2 <- lm(l_ofc2 ~ l_grams_int + l_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+lin_feis.r_vmpfc1<- lm(r_vmpfc1 ~ l_grams_int + l_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+lin_feis.l_vmpfc1 <- lm(l_vmpfc1 ~ l_grams_int + l_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+lin_feis.r_vmpfc2<- lm(r_vmpfc2 ~ l_grams_int + l_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+lin_feis.l_vmpfc2 <- lm(l_vmpfc2 ~ l_grams_int + l_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+lin_feis.r_ifg <- lm(r_ifg ~ l_grams_int + l_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+lin_feis.l_ifg<- lm(l_ifg ~ l_grams_int + l_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+lin_feis.r_dlpfc <- lm(r_dlpfc ~ l_grams_int + l_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+lin_feis.l_dlpfc<- lm(l_dlpfc ~ l_grams_int + l_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+lin_feis.r_caudate <- lm(r_caudate ~ l_grams_int + l_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+lin_feis.l_caudate<- lm(l_caudate ~ l_grams_int + l_grams_ps_lin + sex + cams_pre_mri + fd_avg_allruns + pre_mri_ff, data = feis_LargevSmall)
+
+summary(lin_feis.r_amygdala) #lin
+summary(lin_feis.l_amygdala) #lin
+summary(lin_feis.r_striatum)
+summary(lin_feis.l_striatum)
+summary(lin_feis.r_ofc2)
+summary(lin_feis.l_ofc2)
+summary(lin_feis.r_vmpfc1)
+summary(lin_feis.l_vmpfc1)
+summary(lin_feis.r_vmpfc2)
+summary(lin_feis.l_vmpfc2)
+summary(lin_feis.r_ifg)
+summary(lin_feis.l_ifg)
+summary(lin_feis.r_dlpfc)
+summary(lin_feis.l_dlpfc)
+summary(lin_feis.r_caudate)
+summary(lin_feis.l_caudate)
+
+
+```
 
 #### mixed effects analyses #### 
 
