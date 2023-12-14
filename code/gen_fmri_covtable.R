@@ -2,6 +2,7 @@
 # FEIS estimates
 # CEBQ
 # imaging covariates: sex, average FD, pre-mri fullness, pre-mri CAMS
+# BMI percentile and ree for potential sensitivity analyses
 
 #### Setup ####
 
