@@ -1,0 +1,62 @@
+#!/bin/bash
+#  
+#Useage: gen_sub_scripts_paper2      $1..$n        
+#                          participantID
+#
+#
+# The purpose of this script is to generate a wrapper for preprocessing scripts (found in /afni/proc_scripts)
+# for each participant that can be run on the ACI cluster with PBS
+#
+###################### set up initial variables  ###########################
+#get date
+today=`date +%m_%d_%y`
+
+#set topdir--code/afni folder/current working directory
+topdir="$PWD"
+
+###################### LOOP ######################
+#below the script loops through participant numbers entered as arguments 
+for par in $@
+do
+    ###################### set up participant variables  ###########################
+
+    #make participant number have leading zeros (001)
+    parID_num=$(printf "%03d" $par)
+        
+    #set participant script folder name
+    par_ScriptDir=$topdir/sub-${parID_num}
+
+    #check to see if participant has script directory and if not, make one
+    if [ ! -d $par_ScriptDir ]
+    then
+	mkdir $par_ScriptDir
+    fi
+    
+    #go to template script folder
+    cd $topdir/template_scripts
+
+    #generate participant specific scripts by replacing place-holder 
+    #text with participant specific information.
+    #loop through all needed scripts.
+    
+    #list of all script names
+    proc_scripts=(paper2_wrapper-afni paper2_wrapper-afni.pbs )
+
+    for script in "${proc_scripts[@]}"
+    do
+	#set script name
+	parScript=${par_ScriptDir}/sub-${parID_num}_${script}
+
+	#replace PARNUM with participant ID number in all scripts
+	#note: sed stands for stream editor--it takes text input
+	#and performs specific operations on lines of input
+
+	#replace PARNUM with participant ID number
+	sed "s|PARNUM|${parID_num}|g" $script > $parScript
+	sed -i "s|DATE|${today}|g" $parScript
+	
+	#make executable
+	chmod 775 $parScript
+    done
+done
+
