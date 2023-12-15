@@ -3,7 +3,7 @@
 # generates meets_inclusion_criteria dataframe with 3 columns:
 # 1. sub
 # 2. has_3goodruns_b20 - does child have 3 good runs after censoring runs
-#                        with >=20% TRs censored in task (food and office) blocks (1 = yes, 0 = no)
+#                        with >=20% TRs censored in food-cue task (i.e., food and office) blocks (1 = yes, 0 = no)
 # 3. has_3meals - does child have overall intake data for at least 3 meals (1 = yes, 0 = no)
 # 4. has_4meals - does child have overall intake data for 4 meals (1 = yes, 0 = no)
 
@@ -65,7 +65,7 @@ for (i in 1:nrow(meets_inclusion_criteria)) {
 
 }
 
-# Create a new variable "overall_include" based on has_3meals and has_3goodruns_f20
+# Create a new variable "overall_include" based on has_3meals and has_3goodruns_b20
 meets_inclusion_criteria$overall_include_b20 <- ifelse(meets_inclusion_criteria$has_3meals == 1 & meets_inclusion_criteria$has_3goodruns_b20 == 1, 1, 0)
 
 
