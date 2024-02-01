@@ -38,28 +38,6 @@ for (i in 1:nrow(meets_inclusion_criteria)) {
     meets_inclusion_criteria$has_quad_feis[meets_inclusion_criteria$sub == sub_value] <- 0
   }
 
-  # check for CEBQ_SR values
-  if ( sub_value %in% fmri_covariates$sub ) {
-    if (fmri_covariates$cebq_sr[fmri_covariates$sub == sub_value] != -999) {
-      meets_inclusion_criteria$has_sr[meets_inclusion_criteria$sub == sub_value] <- 1
-    } else {
-      meets_inclusion_criteria$has_sr[meets_inclusion_criteria$sub == sub_value] <- 0
-    }
-  } else {
-    meets_inclusion_criteria$has_sr[meets_inclusion_criteria$sub == sub_value] <- 0
-  }
-
-  # check for CEBQ_FR values
-  if ( sub_value %in% fmri_covariates$sub ) {
-    if (fmri_covariates$cebq_fr[fmri_covariates$sub == sub_value] != -999) {
-      meets_inclusion_criteria$has_fr[meets_inclusion_criteria$sub == sub_value] <- 1
-    } else {
-      meets_inclusion_criteria$has_fr[meets_inclusion_criteria$sub == sub_value] <- 0
-    }
-  } else {
-    meets_inclusion_criteria$has_fr[meets_inclusion_criteria$sub == sub_value] <- 0
-  }
-
   # check for covariates
   if ( sub_value %in% fmri_covariates$sub ) {
     if (fmri_covariates$pre_mri_ff[fmri_covariates$sub == sub_value] != -999 &&
@@ -88,8 +66,6 @@ meets_inclusion_criteria$cortical_fov <- ifelse(meets_inclusion_criteria$sub %in
 
 # _lin_ = indicates analysis with parameters from linear FEIS models
 # _quad_ = indicates analysis with parameters from quadratic FEIS models
-# _fr_ = indicates analysis with food responsiveness
-# _sr_ = indicates analysis with satiety responsiveness
 # _app = indicates analysis with appetitive mask
 # _cer = indicates analysis with cerebellum mask
 # _b20 = indicates runs censored if >=20% TRs censored across task (food and office) blocks
@@ -107,16 +83,6 @@ subset_quad_app_b20 <- meets_inclusion_criteria[meets_inclusion_criteria$has_3go
                                                   meets_inclusion_criteria$cortical_fov == 1 &
                                                   meets_inclusion_criteria$has_quad_feis == 1, ]
 
-subset_fr_app_b20 <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns_b20 == 1  &
-                                                  meets_inclusion_criteria$has_covar == 1 &
-                                                  meets_inclusion_criteria$cortical_fov == 1 &
-                                                  meets_inclusion_criteria$has_fr == 1, ]
-
-subset_sr_app_b20 <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns_b20 == 1  &
-                                                 meets_inclusion_criteria$has_covar == 1 &
-                                                 meets_inclusion_criteria$cortical_fov == 1 &
-                                                 meets_inclusion_criteria$has_sr == 1, ]
-
 subset_lin_cer_b20 <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns_b20 == 1  &
                                                              meets_inclusion_criteria$has_covar == 1 &
                                                              meets_inclusion_criteria$has_lin_feis == 1, ]
@@ -125,15 +91,6 @@ subset_quad_cer_b20 <- meets_inclusion_criteria[meets_inclusion_criteria$has_3go
                                                               meets_inclusion_criteria$has_covar == 1 &
                                                               meets_inclusion_criteria$has_quad_feis == 1, ]
 
-subset_fr_cer_b20 <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns_b20 == 1  &
-                                                            meets_inclusion_criteria$has_covar == 1 &
-                                                            meets_inclusion_criteria$has_fr == 1, ]
-
-subset_sr_cer_b20 <- meets_inclusion_criteria[meets_inclusion_criteria$has_3goodruns_b20 == 1  &
-                                                            meets_inclusion_criteria$has_covar == 1 &
-                                                            meets_inclusion_criteria$has_sr == 1, ]
-
-
 ## subset fmri covariates to only include subjects included in quadratic analyses
 subset_fmri_covariates_quad_app <- fmri_covariates[fmri_covariates$sub %in% subset_quad_app_b20$sub,]
 subset_fmri_covariates_quad_cer <- fmri_covariates[fmri_covariates$sub %in% subset_quad_cer_b20$sub,]
@@ -141,39 +98,11 @@ subset_fmri_covariates_quad_cer <- fmri_covariates[fmri_covariates$sub %in% subs
 # make tab-separated lists
 index_lin_app_b20 <- paste(subset_lin_app_b20$sub, collapse="\t")
 index_quad_app_b20 <- paste(subset_quad_app_b20$sub, collapse="\t")
-index_fr_app_b20 <- paste(subset_fr_app_b20$sub, collapse="\t")
-index_sr_app_b20 <- paste(subset_sr_app_b20$sub, collapse="\t")
 index_lin_cer_b20 <- paste(subset_lin_cer_b20$sub, collapse="\t")
 index_quad_cer_b20 <- paste(subset_quad_cer_b20$sub, collapse="\t")
-index_fr_cer_b20 <- paste(subset_fr_cer_b20$sub, collapse="\t")
-index_sr_cer_b20 <- paste(subset_sr_cer_b20$sub, collapse="\t")
-
-# make tab-separated lists by quadratic sign
-index_g_posquad_app_b20 <- paste(subset_fmri_covariates_quad_app$sub[subset_fmri_covariates_quad_app$quad_sign_gram == 1], collapse="\t")
-index_g_negquad_app_b20 <- paste(subset_fmri_covariates_quad_app$sub[subset_fmri_covariates_quad_app$quad_sign_gram == 0], collapse="\t")
-index_kcal_posquad_app_b20 <- paste(subset_fmri_covariates_quad_app$sub[subset_fmri_covariates_quad_app$quad_sign_kcal == 1], collapse="\t")
-index_kcal_negquad_app_b20 <- paste(subset_fmri_covariates_quad_app$sub[subset_fmri_covariates_quad_app$quad_sign_kcal == 0], collapse="\t")
-index_g_posquad_cer_b20 <- paste(subset_fmri_covariates_quad_cer$sub[subset_fmri_covariates_quad_cer$quad_sign_gram == 1], collapse="\t")
-index_g_negquad_cer_b20 <- paste(subset_fmri_covariates_quad_cer$sub[subset_fmri_covariates_quad_cer$quad_sign_gram == 0], collapse="\t")
-index_kcal_posquad_cer_b20 <- paste(subset_fmri_covariates_quad_cer$sub[subset_fmri_covariates_quad_cer$quad_sign_kcal == 1], collapse="\t")
-index_kcal_negquad_cer_b20 <- paste(subset_fmri_covariates_quad_cer$sub[subset_fmri_covariates_quad_cer$quad_sign_kcal == 0], collapse="\t")
-
 
 # write tab-separated lists
 writeLines(index_lin_app_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_lin_appetitive_fd-0.9_b20_3runs.txt")
 writeLines(index_quad_app_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_quad_appetitive_fd-0.9_b20_3runs.txt")
-writeLines(index_fr_app_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_fr_appetitive_fd-0.9_b20_3runs.txt")
-writeLines(index_sr_app_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_sr_appetitive_fd-0.9_b20_3runs.txt")
 writeLines(index_lin_cer_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_lin_cerebellum_fd-0.9_b20_3runs.txt")
 writeLines(index_quad_cer_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_quad_cerebellum_fd-0.9_b20_3runs.txt")
-writeLines(index_fr_cer_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_fr_cerebellum_fd-0.9_b20_3runs.txt")
-writeLines(index_sr_cer_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_sr_cerebellum_fd-0.9_b20_3runs.txt")
-
-writeLines(index_g_posquad_app_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_g_posquad_appetitive_fd-0.9_b20_3runs.txt")
-writeLines(index_g_negquad_app_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_g_negquad_appetitive_fd-0.9_b20_3runs.txt")
-writeLines(index_kcal_posquad_app_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_kcal_posquad_appetitive_fd-0.9_b20_3runs.txt")
-writeLines(index_kcal_negquad_app_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_kcal_negquad_appetitive_fd-0.9_b20_3runs.txt")
-writeLines(index_g_posquad_cer_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_g_posquad_cerebellum_fd-0.9_b20_3runs.txt")
-writeLines(index_g_negquad_cer_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_g_negquad_cerebellum_fd-0.9_b20_3runs.txt")
-writeLines(index_kcal_posquad_cer_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_kcal_posquad_cerebellum_fd-0.9_b20_3runs.txt")
-writeLines(index_kcal_negquad_cer_b20, "BIDS/derivatives/analyses/foodcue-paper2/R/index_kcal_negquad_cerebellum_fd-0.9_b20_3runs.txt")
