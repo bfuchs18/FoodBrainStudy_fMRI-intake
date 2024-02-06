@@ -19,7 +19,7 @@ In this folder:
 -   gen_fmri_index.R : generates "index files" that list subjects to include in fmri analyses. exports data as .txt files into /BIDS/derivatives/analyses/foodcue-paper2/R/ (sourced by analyze_descriptives.Rmd, analyze_beh.Rmd)
 -   analyze_descriptives.Rmd: generates descriptive statistics for fmri predictors/covariates and demographics
 -   analyze_beh.Rmd: plots and analyzes in-scanner behavioral data (percent wanting)
--   cerebellum-intake_plot.Rmd: plots the association between cerebellar BOLD responses to portion size and quadratic portion size slopes
+-   cerebellum-intake_plot.Rmd: plots (1) association between cerebellar BOLD responses to portion size and quadratic portion size slopes and (2) simulated subject-specific portion size curves
 
 ### data/
 
