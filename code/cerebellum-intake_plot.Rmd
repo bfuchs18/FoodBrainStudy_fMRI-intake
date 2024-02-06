@@ -19,13 +19,16 @@ To guarantee we are plotting data used in fMRI analyses, import data directly fr
 map_dir <- file.path("..", "BIDS", 
                      "derivatives", "analyses", 
                      "foodcue-paper2", "level2", 
-                     "feis_cerebellum", "ped_fd-0.9_b20_3runs_noGSR_08-25-23")
+                     "feis_cerebellum", "ped_fd-0.9_b20_3runs_noGSR_09-05-23")
 
 # import fmri_covariate file used in analyses
-fmri_covariates <- read.delim(file.path(map_dir, "fmri_covariates.csv"))
+#fmri_covariates_result <- read.delim(file.path(map_dir, "fmri_covariates.csv"))
+fmri_covariates_result <- read.delim("~/Library/CloudStorage/OneDrive-ThePennsylvaniaStateUniversity/a-bari/00_PennState/Projects/FoodBrainStudy_fMRI-intake/BIDS/derivatives/analyses/foodcue-paper2/level2/feis_cerebellum/ped_fd-0.9_b20_3runs_noGSR_08-25-23/fmri_covariates.csv")
 
 # import file with extracted betas
-betas <- read.delim(file.path(map_dir, "cerebellum_betas.txt"))
+#betas <- read.delim(file.path(map_dir, "cerebellum_betas.txt"))
+
+betas <- read.delim("~/Library/CloudStorage/OneDrive-ThePennsylvaniaStateUniversity/a-bari/00_PennState/Projects/FoodBrainStudy_fMRI-intake/BIDS/derivatives/analyses/foodcue-paper2/level2/feis_cerebellum/ped_fd-0.9_b20_3runs_noGSR_08-25-23/cerebellum_betas.txt")
 
 ```
 
@@ -44,42 +47,29 @@ betas$betas <- as.numeric(sub(" .*", "", str_trim(betas$betas_str)))
 ```{r concat dataframes}
 
 # merge, only retain subjects included in both dataframes (default setting)
-fmri_covariates <- merge(fmri_covariates, betas, by = "sub")
+fmri_covariates_result <- merge(fmri_covariates_result, betas, by = "sub")
 
 ```
 
 ## Plot
 
-Does it make sense to do this?
 ```{r plot residual values, echo=FALSE}
 
-lm_predict_betas = lm(betas ~ q_grams_int + q_grams_ps_lin + q_grams_ps_quad + sex + fd_avg_allruns + pre_mri_ff + cams_pre_mri, data = fmri_covariates)
+lm_predict_betas = lm(betas ~ q_grams_int + q_grams_ps_lin + q_grams_ps_quad + sex + fd_avg_allruns + pre_mri_ff + cams_pre_mri, data = fmri_covariates_result)
 
 # get adjusted response after adjusting for covariates in model 
-fmri_covariates$predict_betas <- predict(lm_predict_betas, type="response")
+fmri_covariates_result$predict_betas <- predict(lm_predict_betas, type="response")
 
 
-ggplot(fmri_covariates, aes(x=q_grams_ps_quad, y=predict_betas)) + 
+ggplot(fmri_covariates_result, aes(x=q_grams_ps_quad, y=predict_betas)) + 
   geom_point()+
   geom_smooth(method=lm, formula = y ~ x, color="black") +
   labs(title="Adjusted cerebellum response vs. quadratic PSE (g)",
-       x="Quadratic slope (grams)", y = "Adjusted BOLD response to Larger - Smaller foods") + 
+       x="Quadratic portion size slope (grams)", y = "Adjusted BOLD response to portion size (larger - smaller)") + 
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=12)) +
   theme(axis.title=element_text(size=12,face="bold"))
-
-```
-
-```{r plot raw values, echo=FALSE}
-
-ggplot(fmri_covariates, aes(x=q_grams_ps_quad, y=betas)) + 
-  geom_point()+
-  geom_smooth(method=lm, formula = y ~ x, color="black") +
-  labs(title="Cerebellum response vs. quadratic PSE (g)",
-       x="Quadratic slope (grams)", y = "BOLD response to Larger - Smaller foods") + 
-  theme(axis.text.x = element_text(size=12)) +
-  theme(axis.text.y = element_text(size=12)) +
-  theme(axis.title=element_text(size=12,face="bold"))
+#  + geom_text(aes(label = sub), vjust = -0.5) #labels each point with sub
 
 ```
 
@@ -103,4 +93,110 @@ p_low_ttest <- t.test(fmri_covariates[fmri_covariates$q_grams_ps_quad_tertiles %
 p_med_ttest <- t.test(fmri_covariates[fmri_covariates$q_grams_ps_quad_tertiles %in% "Medium", ]$predict_betas, mu = 0)
 p_high_ttest <- t.test(fmri_covariates[fmri_covariates$q_grams_ps_quad_tertiles %in% "High", ]$predict_betas, mu = 0)
 
+```
 
+
+```{r visualize subject curves, include=TRUE}
+
+# create an array of 100 random values between 0 and 1 -- these will be input as x values into ps_slope_func
+rand_ps_prop_xvalues <- sort(runif(100, min = 0, max = 1), decreasing = FALSE)
+
+# function to compute the estimated intake (y-value) for a subject given their quadratic estimate, linear estimate, intercept and a portion size increase from baseline (x-value)
+ps_slope_func = function(quad, lin, intercept, x){
+  y = quad*(x^2)+lin*x+intercept
+  return(y)
+}
+
+# apply slope function for a selection of subjects. Quad, lin, and intercept values are derived from quadratic FEIS model predicting gram intake
+sub_003_yvalues <- mapply(ps_slope_func, rand_ps_prop_xvalues, MoreArgs = list(quad = -799.9108, lin = 839.3623, intercept = 354.9124 ))
+sub_071_yvalues <- mapply(ps_slope_func, rand_ps_prop_xvalues, MoreArgs = list(quad = -550.60653, lin = 399.04231, intercept = 469.1725))
+sub_037_yvalues <- mapply(ps_slope_func, rand_ps_prop_xvalues, MoreArgs = list(quad = -424.4314, lin = 430.515, intercept = 352.9592))
+sub_105_yvalues <- mapply(ps_slope_func, rand_ps_prop_xvalues, MoreArgs = list(quad = 89.816, lin = -81.68819, intercept = 406.8864))
+sub_131_yvalues <- mapply(ps_slope_func, rand_ps_prop_xvalues, MoreArgs = list(quad = 223.93734, lin = -168.85984, intercept = 372.8228))
+sub_054_yvalues <- mapply(ps_slope_func, rand_ps_prop_xvalues, MoreArgs = list(quad = 332.4029, lin = -228.674, intercept = 175.4926))
+sub_096_yvalues <- mapply(ps_slope_func, rand_ps_prop_xvalues, MoreArgs = list(quad = 1093.014, lin = -1025.769, intercept = 627.5578))
+sub_073_yvalues <- mapply(ps_slope_func, rand_ps_prop_xvalues, MoreArgs = list(quad = 666.1964, lin = -652.52, intercept = 606.9356))
+sub_094_yvalues <- mapply(ps_slope_func, rand_ps_prop_xvalues, MoreArgs = list(quad = -32.56549, lin = -172.5793, intercept = 479.4788))
+sub_116_yvalues <- mapply(ps_slope_func, rand_ps_prop_xvalues, MoreArgs = list(quad = 321.607, lin = 59.2612, intercept = 325.7238))
+sub_005_yvalues <- mapply(ps_slope_func, rand_ps_prop_xvalues, MoreArgs = list(quad = 230.208600, lin = 99.06557, intercept = 739.1195))
+sub_070_yvalues <- mapply(ps_slope_func, rand_ps_prop_xvalues, MoreArgs = list(quad = 51.01407, lin = 19.25193, intercept = 431.8514))
+
+# make a dataframe with x (portion size) and y values (predicted gram intake) for each subject
+sub_003 = data.frame(unlist(rand_ps_prop_xvalues),unlist(sub_003_yvalues))
+sub_071 = data.frame(unlist(rand_ps_prop_xvalues),unlist(sub_071_yvalues))
+sub_037 = data.frame(unlist(rand_ps_prop_xvalues),unlist(sub_037_yvalues))
+sub_131 = data.frame(unlist(rand_ps_prop_xvalues),unlist(sub_131_yvalues))
+sub_105 = data.frame(unlist(rand_ps_prop_xvalues),unlist(sub_105_yvalues))
+sub_054 = data.frame(unlist(rand_ps_prop_xvalues),unlist(sub_054_yvalues))
+sub_096 = data.frame(unlist(rand_ps_prop_xvalues),unlist(sub_096_yvalues))
+sub_073 = data.frame(unlist(rand_ps_prop_xvalues),unlist(sub_073_yvalues))
+sub_094 = data.frame(unlist(rand_ps_prop_xvalues),unlist(sub_094_yvalues))
+sub_116 = data.frame(unlist(rand_ps_prop_xvalues),unlist(sub_116_yvalues))
+sub_005 = data.frame(unlist(rand_ps_prop_xvalues),unlist(sub_005_yvalues))
+sub_070 = data.frame(unlist(rand_ps_prop_xvalues),unlist(sub_070_yvalues))
+
+# assign column names
+names(sub_003) = c("x","y")
+names(sub_071) = c("x","y")
+names(sub_037) = c("x","y")
+names(sub_105) = c("x","y")
+names(sub_131) = c("x","y")
+names(sub_054) = c("x","y")
+names(sub_096) = c("x","y")
+names(sub_073) = c("x","y")
+names(sub_094) = c("x","y")
+names(sub_116) = c("x","y")
+names(sub_005) = c("x","y")
+names(sub_070) = c("x","y")
+
+#### Simulate portion size curves using x (portion size) and y values (predicted gram intake) 
+
+# sub 37 -- example negative quadratic (Figures 4, S3)
+ggplot(sub_037, aes(x=x, y=y)) + ggtitle("ID 37") +
+  geom_point() + ylim(0,750) + xlab("Proportion increase in amount served (g)") + ylab("Estimated intake") + scale_x_continuous(breaks = seq(from = 0, to = .99, by = 0.33))
+
+# sub 105 -- example ~0 quadratic slope (Figure 4)
+ggplot(sub_105, aes(x=x, y=y)) + ggtitle("ID 105") +
+  geom_point() + ylim(0,750) + xlab("Proportion increase in amount served (g)") + ylab("Estimated intake") + scale_x_continuous(breaks = seq(from = 0, to = .99, by = 0.33))
+
+# sub 54 -- example positive quadratic (Figures 4, S3)
+ggplot(sub_054, aes(x=x, y=y)) + ggtitle("ID 054") +
+  geom_point() + ylim(0,750) + xlab("Portion proportion") + ylab("Estimated intake") + scale_x_continuous(breaks = seq(from = 0, to = .99, by = 0.33))
+
+# sub 3 -- example positive linear + negative quadratic (Figures S2, S3)
+ggplot(sub_003, aes(x=x, y=y)) + ggtitle("ID 3") +
+  geom_point() + ylim(0,750) + xlab("Proportion increase in amount served (g)") + ylab("Estimated intake") + scale_x_continuous(breaks = seq(from = 0, to = .99, by = 0.33))
+
+# sub 71 -- example positive linear + negative quadratic (Figures S2, S3)
+ggplot(sub_071, aes(x=x, y=y)) + ggtitle("ID 71") +
+  geom_point() + ylim(0,750) + xlab("Proportion increase in amount served (g)") + ylab("Estimated intake") + scale_x_continuous(breaks = seq(from = 0, to = .99, by = 0.33))
+
+# sub 94 -- example negative linear + negative quadratic (Figures S2, S3)
+ggplot(sub_094, aes(x=x, y=y)) + ggtitle("ID 94") +
+  geom_point() + ylim(0,750) + xlab("Proportion increase in amount served (g)") + ylab("Estimated intake") + scale_x_continuous(breaks = seq(from = 0, to = .99, by = 0.33))
+
+# sub 131 -- example negative linear + positive quadratic (Figures S2, S3)
+ggplot(sub_131, aes(x=x, y=y)) + ggtitle("ID 131") +
+  geom_point() + ylim(0,750) + xlab("Portion proportion") + ylab("Estimated intake (g)") + scale_x_continuous(breaks = seq(from = 0, to = .99, by = 0.33))
+
+# sub 73 -- example negative linear + positive quadratic (Figures S2, S3)
+ggplot(sub_073, aes(x=x, y=y)) + ggtitle("ID 073") +
+  geom_point() + ylim(0,750) + xlab("Portion proportion") + ylab("Estimated intake") + scale_x_continuous(breaks = seq(from = 0, to = .99, by = 0.33))
+
+# sub 116 -- example positive linear + positive quad (Figures S2, S3)
+ggplot(sub_116, aes(x=x, y=y)) + ggtitle("ID 116") +
+  geom_point() + ylim(0,750) + xlab("Portion proportion") + ylab("Estimated intake") + scale_x_continuous(breaks = seq(from = 0, to = .99, by = 0.33))
+
+# sub 70 -- example positive linear + positive quad (Figures S2, S3)
+ggplot(sub_070, aes(x=x, y=y)) + ggtitle("ID 70") +
+  geom_point() + ylim(0,750) + xlab("Portion proportion") + ylab("Estimated intake") + scale_x_continuous(breaks = seq(from = 0, to = .99, by = 0.33))
+
+# sub 5 -- example quadratic (Figure S3)
+ggplot(sub_005, aes(x=x, y=y)) + ggtitle("ID 116") +
+  geom_point() + ylim(0,1500) + xlab("Portion proportion") + ylab("Estimated intake") + scale_x_continuous(breaks = seq(from = 0, to = .99, by = 0.33))
+
+# sub 96 -- example quadratic (Figure S3)
+ggplot(sub_096, aes(x=x, y=y)) + ggtitle("ID 96") +
+  geom_point() + ylim(0,750) + xlab("Portion proportion") + ylab("Estimated intake") + scale_x_continuous(breaks = seq(from = 0, to = .99, by = 0.33))
+
+```
