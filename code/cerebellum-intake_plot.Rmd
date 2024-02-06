@@ -51,7 +51,7 @@ fmri_covariates_result <- merge(fmri_covariates_result, betas, by = "sub")
 
 ```
 
-## Plot
+## Plot association between adjusted BOLD response and quadratic slope
 
 ```{r plot residual values, echo=FALSE}
 
@@ -73,28 +73,7 @@ ggplot(fmri_covariates_result, aes(x=q_grams_ps_quad, y=predict_betas)) +
 
 ```
 
-
-To aid in interpretation of results: group subjects into 3 groups (tertiles) based on quadratic slope, and test whether neural response to amount within each tertile is significantly different from zero
-```{r test tertiles, echo=FALSE}
-
-library(dplyr)
-
-# Calculate tertiles and assign labels
-fmri_covariates <- fmri_covariates %>%
-  mutate(q_grams_ps_quad_tertiles = cut(q_grams_ps_quad, breaks = quantile(q_grams_ps_quad, probs = c(0, 1/3, 2/3, 1)), labels = c("Low", "Medium", "High")))
-
-# test non-adjusted betas
-low_ttest <- t.test(fmri_covariates[fmri_covariates$q_grams_ps_quad_tertiles %in% "Low", ]$betas, mu = 0)
-med_ttest <- t.test(fmri_covariates[fmri_covariates$q_grams_ps_quad_tertiles %in% "Medium", ]$betas, mu = 0)
-high_ttest <- t.test(fmri_covariates[fmri_covariates$q_grams_ps_quad_tertiles %in% "High", ]$betas, mu = 0)
-
-# test adjusted betas
-p_low_ttest <- t.test(fmri_covariates[fmri_covariates$q_grams_ps_quad_tertiles %in% "Low", ]$predict_betas, mu = 0)
-p_med_ttest <- t.test(fmri_covariates[fmri_covariates$q_grams_ps_quad_tertiles %in% "Medium", ]$predict_betas, mu = 0)
-p_high_ttest <- t.test(fmri_covariates[fmri_covariates$q_grams_ps_quad_tertiles %in% "High", ]$predict_betas, mu = 0)
-
-```
-
+## Simulate subject-level portion size curves
 
 ```{r visualize subject curves, include=TRUE}
 
