@@ -35,15 +35,26 @@ This folder contains code to (1) process in-scanner wanting data and (2) process
 
 #### BIDS/code/foodcue_proc
 
-This folder contains code used to ....
+This folder contains code used to generate derivatives needed for fmri analyses in AFNI (e.g., onset files, censor files).
+Scripts that begin with p_ contain functions that can be run for 1 subject at a time.
 
-#### BIDS/code/afni/proc_scripts
+- p0_getbehavial.py: summarizes behavioral (wanting) data from the food-cue task by block
+- p1_getonsets.py: generates onset files that contain onsets for all runs (even those with high motion) 
+- p2_create_censor_files.py: will process -desc-confounds_timeseries.tsv files (output from fmriprep). Outputs regressor and censor files.
+- p4a_gen_byrun_onsets.py: generates onset files that exclude runs with motion above a certain threshold
+- p6_calc_avg_motion.py: calculates the average framewise displacement during food-cue task for a subject. exports data into {}
+- wrapper-python_paper2.py: runs p0, p1, p2, p4a, p6 for all subjects with food-cue task data in bids/raw_data
 
-This folder contains code used to process MRI data following fmriprep
+#### BIDS/code/afni/
 
--   1_smooth-scale: smooths (blurs) and scales fmri data
--   2_createmask: creates overall foodcue mask using separate foodcue run masks
--   3_3ddeconvolve: runs first-level GLM
+This folder contains code used to process and analyze MRI data following fmriprep
+
+-   gen_sub_scripts_paper2: generates a wrapper file for each subject using templates in template_scripts/. The wrapper will be used to call scripts in proc_scripts/
+-   proc_scripts/1_smooth-scale: smooths (blurs) and scales fmri data (uses derivatives from fmriprep)
+-   proc_scripts/2_createmask: creates overall foodcue mask using separate foodcue run masks (uses derivatives from fmriprep)
+-   proc_scripts/3_3ddeconvolve: runs first-level GLM (uses derivatives from fmriprep and output from code in BIDS/code/foodcue_proc/)
+-   template_scripts/paper2_wrapper-afni: template wrapper
+-   template_scripts/paper2_wrapper-afni.pbs: template to run paper2_wrapper-afni on Penn State computing cluster via PBS job scheduler
 
 #### BIDS/code/afni/groupanalyses_paper2
 
