@@ -18,14 +18,14 @@ source("code/setup_data.R")
 # for each sub, determine number of runs with <20% of TRs censored in food and office blocks
 good_run_count <- mot_sum %>%
   group_by(sub) %>%
-  summarize(n_good_runs_b20 = sum(p_censor_blocks < 20))
+  dplyr::summarize(n_good_runs_b20 = sum(p_censor_blocks < 20))
 
 #### Determine number of meals ####
 
 # Group by "sub" and summarize the counts
 meal_count <- intake_long %>%
   group_by(sub) %>%
-  summarize(count = sum(!is.na(grams)))
+  dplyr::summarize(count = sum(!is.na(grams)))
 
 
 #### Generate inclusion database ####
