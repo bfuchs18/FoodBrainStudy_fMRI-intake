@@ -11,15 +11,9 @@ editor_options:
 
 ```{r load packages }
 # load packages
-library(data.table)
-library(table1)
-library(ggplot2)
-library(corrplot)
-library(tidyr) # to use "gather()"
-library(Hmisc) # to plot all histograms in a dataframe
-library(RcmdrMisc)
-library(matrixcalc)
-library(psych)
+library(table1) # used to generate tables with table1()
+library(Hmisc) # used to get pearson correlations with rcorr()
+
 ```
 
 ```{r load generated datasets, include=FALSE}
@@ -85,6 +79,9 @@ participants_r01_demo$analyzed <- ifelse(participants_r01_demo$sub %in% fmri_sub
 participants_r01_demo <- merge(participants_r01_demo, fd[, c("sub", "fd_avg_allruns")], by = "sub", all.x = TRUE)
 participants_r01_demo <- merge(participants_r01_demo, impute_data[, c("sub", "pre_mri_ff")], by = "sub", all.x = TRUE) #impute_data is generated in gen_fmri_covtable. It includes all subs who attended V6, and does not contain the imputed pre-mri fullness value
 participants_r01_demo <- merge(participants_r01_demo, r01_V6[, c("sub", "cams_pre_mri")], by = "sub", all.x = TRUE)
+
+# add portion size slope estimates
+participants_r01_demo <- merge(participants_r01_demo, fmri_covariates[0:12], by = "sub", all.x = TRUE)
 
 ```
 
@@ -242,7 +239,7 @@ percent_positive_quad_kcal # percent of children with positive quadratic slope e
 ```
 
 
-# Manuscript Table S3 - Correlations between portion size slopes
+# Manuscript Table S2 - Correlations between portion size slopes
 
 ```{r correlation matrix, include=TRUE}
 
@@ -286,3 +283,28 @@ round(p_ADJ, 4)
 round(p_UNADJ, 4)
 
 ```
+
+# Manuscript Table S3 - Associations between portion size slopes are participant characteristics
+```{r  PSE vs demo, include=TRUE}
+
+#### associations with sex ####
+t.test(participants_r01_demo$l_grams_ps_lin ~ participants_r01_demo$sex, var.equal = FALSE) # linear model linear slope, grams
+t.test(participants_r01_demo$l_kcal_ps_lin ~ participants_r01_demo$sex, var.equal = FALSE) # linear model linear slope, kcal
+t.test(participants_r01_demo$q_grams_ps_quad ~ participants_r01_demo$sex, var.equal = FALSE) # quadratic model quadratic slope, grams
+t.test(participants_r01_demo$q_kcal_ps_quad ~ participants_r01_demo$sex, var.equal = FALSE) # quadratic model quadratic slope, kcal
+
+#### associations with age ####
+cor.test(participants_r01_demo$l_grams_ps_lin, participants_r01_demo$age_yr, method=c("pearson"))
+cor.test(participants_r01_demo$l_kcal_ps_lin, participants_r01_demo$age_yr, method=c("pearson"))
+cor.test(participants_r01_demo$q_grams_ps_quad, participants_r01_demo$age_yr, method=c("pearson"))
+cor.test(participants_r01_demo$q_kcal_ps_quad, participants_r01_demo$age_yr, method=c("pearson"))
+
+#### association with bmi% ####
+cor.test(participants_r01_demo$l_grams_ps_lin, participants_r01_demo$bmi_percentile, method=c("pearson"))
+cor.test(participants_r01_demo$l_kcal_ps_lin, participants_r01_demo$bmi_percentile, method=c("pearson"))
+cor.test(participants_r01_demo$q_grams_ps_quad, participants_r01_demo$bmi_percentile, method=c("pearson"))
+cor.test(participants_r01_demo$q_kcal_ps_quad, participants_r01_demo$bmi_percentile, method=c("pearson"))
+
+```
+
+
