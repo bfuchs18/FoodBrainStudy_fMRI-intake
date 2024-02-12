@@ -12,6 +12,7 @@ This folder contains .R and .Rmd files used for demographic/behavioral analyses 
 
 In this folder:
 
+-   deidentify_data.R: removes PII from datasets in data/raw/ and copies de-identified data into data/raw_deidentified/
 -   setup_data.R: imports and organizes raw data (sourced by determine_analysis_sample.R)
 -   determine_analysis_sample.R: generates dataframe to determine which subjects meet criteria for analyses (sourced by feis_portionsize.R)
 -   feis_portionsize.R: extracts individual-level portion size slopes using FEIS models (sourced by gen_fmri_covtable.R)
@@ -25,9 +26,17 @@ In this folder:
 
 #### data/raw
 
-This folder contains data raw data used as input for code in R/
+This folder would contain data raw data used as input for code in R/ but it will not be shared, as some datasets contain potentially identifiable information. Datasets in this folder have been copied into data/raw_deidentified with potentially identifiable information (visit 1 date, day of birth, race, ethnicity) removed. 
 
--   FILE: {description}
+#### data/raw_deidentified
+
+This folder contains raw but de-identified datasets to use as input for code in R/. Using this data will require updating import paths in setup_data.R Files starting with dict- contain metadata for the following datasets:
+
+-   anthro_data.csv: contains anthropometric data 
+-   demographics_data.csv: contains demographic data
+-   intake_data.csv: contains data from the four portion size meals
+-   visit6_data.csv: contains data related to the MRI visit (e.g., pre-mri fullness and anxiety; not fmri or food-cue task data)
+-   FoodAndBrainR01DataP-Scansroar.csv: contains data that indicates whether each fMRI run was initiatied 
 
 ### BIDS/code
 
