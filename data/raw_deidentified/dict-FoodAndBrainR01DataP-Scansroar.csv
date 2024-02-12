@@ -1,0 +1,12 @@
+column,variable,label,value_labels
+1,par_id,participant ID,
+2,redcap_event_name,,
+3,fmri_pp_complete,"""Did scanning (structual or funtional) occur?""","1 = yes, 0 = no"
+4,fmri_pp_scans_roar___0,"""MPRAGE transferred to ROAR""","1 = yes, 0 = no"
+5,fmri_pp_scans_roar___1,"""Resting-state scan transferred to ROAR"" - indication of scan initiation","1 = yes, 0 = no"
+6,fmri_pp_scans_roar___2,"""Food-cue paradigm 1 transferred to roar"" - indication of scan initiation","1 = yes, 0 = no"
+7,fmri_pp_scans_roar___3,"""Food-cue paradigm 2 transferred to roar"" - indication of scan initiation","1 = yes, 0 = no"
+8,fmri_pp_scans_roar___4,"""Food-cue paradigm 3 transferred to roar"" - indication of scan initiation","1 = yes, 0 = no"
+9,fmri_pp_scans_roar___5,"""Food-cue paradigm 4 transferred to roar"" - indication of scan initiation","1 = yes, 0 = no"
+10,fmri_pp_scans_roar___6,"""Food-cue paradigm 5 transferred to roar"" - indication of scan initiation","1 = yes, 0 = no"
+11,fmri_pp_scans_roar___7,"""Field map transferred to roar"" - indication of scan initiation","1 = yes, 0 = no"
