@@ -21,7 +21,6 @@
 library(haven)
 library(reshape2)
 library(dplyr)
-#source('functions.R')
 
 #### set up ####
 
@@ -244,18 +243,6 @@ intake_long$grape_vas <- intake_grape_vas_long$value
 #continuous approach:
 intake_long$ps_prop <- ifelse(intake_long[['PortionSize']] == 'PS-1', 0, ifelse(intake_long[['PortionSize']] == 'PS-2', 0.33, ifelse(intake_long[['PortionSize']] == 'PS-3', 0.66, 0.99)))
 
-
-
-## 4) Questionnaire eating behavior data ####
-## a) Load Data ####
-r01_eatbeh <- as.data.frame(read_spss(("data/raw/qs_eatbeh_bodyimage.sav")))
-names(r01_eatbeh)[1] <- 'sub'
-
-#remove 2 that were removed for ADHD
-r01_eatbeh <- r01_eatbeh[r01_eatbeh$sub != 31 & r01_eatbeh$sub != 34, ]
-
-# pad with zeros
-r01_eatbeh$sub <- sprintf("%03d", r01_eatbeh$sub)
 
 ## 4) V6 data ####
 ## a) Load Data ####
