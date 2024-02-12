@@ -24,7 +24,7 @@ In this folder:
 
 #### data/raw
 
-This folder would contain data raw data used as input for code in R/ but it will not be shared, as some datasets contain potentially identifiable information. Datasets in this folder have been copied into data/raw_deidentified with potentially identifiable information (visit 1 date, day of birth, race, ethnicity) removed. 
+This folder would contain data raw data used as input for code in R/ but it will not be shared, as some datasets contain potentially identifiable information. Datasets in this folder have been copied into data/raw_deidentified with potentially identifiable information (visit 1 date, date of birth, race, ethnicity) removed. 
 
 #### data/raw_deidentified
 
