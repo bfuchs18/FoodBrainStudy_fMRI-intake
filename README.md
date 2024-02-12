@@ -2,8 +2,6 @@
 
 This project contains code for the paper "Cerebellar response to visual portion size cues is associated with the portion size effect in children (Fuchs et al.)"
 
-*this document is in progress*
-
 ## Folder Structure
 
 ### code/
@@ -16,9 +14,9 @@ In this folder:
 -   setup_data.R: imports and organizes raw data (sourced by determine_analysis_sample.R)
 -   determine_analysis_sample.R: generates dataframe to determine which subjects meet criteria for analyses (sourced by feis_portionsize.R)
 -   feis_portionsize.R: extracts individual-level portion size slopes using FEIS models (sourced by gen_fmri_covtable.R)
--   gen_fmri_covtable.R: generates a table with predictors and covariates for fmri analyses. exports table as csv into /BIDS/derivatives/analyses/foodcue-paper2/R/ (sourced by gen_fmri_index.R)
--   gen_fmri_index.R: generates "index files" that list subjects to include in fmri analyses. exports data as .txt files into /BIDS/derivatives/analyses/foodcue-paper2/R/ (sourced by analyze_descriptives.Rmd, analyze_beh.Rmd)
--   analyze_descriptives.Rmd: generates descriptive statistics for fmri predictors/covariates and demographics
+-   gen_fmri_covtable.R: generates a table with predictors and covariates for fMRI analyses. exports table as CSV into /BIDS/derivatives/analyses/foodcue-paper2/R/ (sourced by gen_fmri_index.R)
+-   gen_fmri_index.R: generates "index files" that list subjects to include in fMRI analyses. exports data as .txt files into /BIDS/derivatives/analyses/foodcue-paper2/R/ (sourced by analyze_descriptives.Rmd, analyze_beh.Rmd)
+-   analyze_descriptives.Rmd: generates descriptive statistics for FMRI predictors/covariates and demographics
 -   analyze_beh.Rmd: plots and analyzes in-scanner behavioral data (percent wanting)
 -   cerebellum-intake_plot.Rmd: plots (1) association between cerebellar BOLD responses to portion size and quadratic portion size slopes and (2) simulated subject-specific portion size curves
 
@@ -35,8 +33,8 @@ This folder contains raw but de-identified datasets to use as input for code in 
 -   anthro_data.csv: contains anthropometric data 
 -   demographics_data.csv: contains demographic data
 -   intake_data.csv: contains data from the four portion size meals
--   visit6_data.csv: contains data related to the MRI visit (e.g., pre-mri fullness and anxiety; not fmri or food-cue task data)
--   FoodAndBrainR01DataP-Scansroar.csv: contains data that indicates whether each fMRI run was initiatied 
+-   visit6_data.csv: contains data related to the MRI visit (e.g., pre-mri fullness and anxiety; not fMRI or food-cue task data)
+-   FoodAndBrainR01DataP-Scansroar.csv: contains data that indicates whether each fMRI run was initiated 
 
 ### BIDS/code
 
@@ -59,7 +57,7 @@ Scripts that begin with p_ contain functions that can be run for 1 subject at a 
 This folder contains code used to process and analyze MRI data following fmriprep
 
 -   gen_sub_scripts_paper2: generates a wrapper file for each subject using templates in template_scripts/. The wrapper will be used to call scripts in proc_scripts/
--   proc_scripts/1_smooth-scale: smooths (blurs) and scales fmri data (uses derivatives from fmriprep)
+-   proc_scripts/1_smooth-scale: smooths (blurs) and scales fMRI data (uses derivatives from fmriprep)
 -   proc_scripts/2_createmask: creates overall foodcue mask using separate foodcue run masks (uses derivatives from fmriprep)
 -   proc_scripts/3_3ddeconvolve: runs first-level GLM (uses derivatives from fmriprep and output from code in BIDS/code/foodcue_proc/)
 -   template_scripts/paper2_wrapper-afni: template wrapper
