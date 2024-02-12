@@ -1,5 +1,4 @@
-# This script was written by Alaina Pearce and Bari Fuchs in August 2022
-# to set up data for extracting the portion size effect
+# This script loads and sets up data for the paper "Cerebellar response to visual portion size cues is associated with the portion size effect in children"
 #
 #     Copyright (C) 2022 Bari Fuchs
 #
@@ -15,6 +14,14 @@
 #
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+############ Note to user ############
+
+# If using publicly-shared data, this script will need to be modified to address the following:
+
+## 1) data are to be imported from data/raw_deidentified instead of data/raw
+## 2) demographics_data.sav, anthro_data.sav, and intake_data.sav are not .sav files, but .csv files -- they can be uploaded with read.csv
+###   data for the following variables have been removed from these datasets: v1_date, dob, race, ethnicity
 
 ############ Basic Data Load/Setup ############
 
@@ -292,4 +299,9 @@ scan_status <- scan_status[scan_status$sub != 31 & scan_status$sub != 34, ]
 
 # pad with zeros
 scan_status$sub <- sprintf("%03d", scan_status$sub)
+
+############ Deidentify for sharing ############
+
+# the following variables will be removed from the data: visit 1 date, dob, race, and ethnicity will be
+
 
